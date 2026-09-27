@@ -2,6 +2,7 @@
     import "./app.css";
     import { ModeWatcher } from "mode-watcher";
     import ModeToggle from "$lib/components/ModeToggle.svelte";
+    import ConnectionIndicator from "$lib/components/ConnectionIndicator.svelte";
     import { backend } from "$lib/backend.svelte";
 
     $effect(() => {
@@ -15,9 +16,7 @@
     <header class="border-b p-4 flex items-center justify-between">
         <div>TempXplain</div>
         <div class="flex items-center gap-4">
-            <span class="text-sm text-muted-foreground">
-                {backend.connected ? "Connected" : "Disconnected"}
-            </span>
+            <ConnectionIndicator />
             <ModeToggle />
         </div>
     </header>
