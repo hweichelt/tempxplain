@@ -22,7 +22,7 @@ async def start_server(registry: Registry[Any], state: object, host: str, port: 
         log.info(f"Frontend connected: {connection.remote_address}")
         with suppress(ConnectionClosed):
             async for message in connection:
-                await connection.send(await registry.handle(state, message))
+                await connection.send(await registry.handle_request(state, message))
         log.info(f"Frontend disconnected: {connection.remote_address}")
 
     return await serve(handle_connection, host, port)

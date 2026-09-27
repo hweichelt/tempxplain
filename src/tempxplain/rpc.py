@@ -82,7 +82,7 @@ class Registry(Generic[State]):
             return await function(state, **params)
         return await asyncio.to_thread(function, state, **params)
 
-    async def handle(self, state: State, message: str | bytes) -> str:
+    async def handle_request(self, state: State, message: str | bytes) -> str:
         """Process a raw request and return the raw response."""
         request_id = None
         try:
