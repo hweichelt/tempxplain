@@ -1,8 +1,8 @@
-site_name: fillname
-site_url: https://docs.potassco.org/fillname/
+site_name: tempxplain
+site_url: https://docs.potassco.org/tempxplain/
 site_description:
-repo_name: potassco/fillname
-repo_url: https://github.com/potassco/fillname
+repo_name: potassco/tempxplain
+repo_url: https://github.com/potassco/tempxplain
 copyright: Copyright &copy; 2026 Potassco
 
 extra_css:

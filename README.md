@@ -1,8 +1,8 @@
-[![Documentation](https://img.shields.io/badge/docs-potassco.org-blue)](https://docs.potassco.org/fillname/)
-[![PyPI version](https://img.shields.io/pypi/v/fillname)](https://pypi.org/project/fillname/)
-[![License](https://img.shields.io/github/license/potassco/fillname)](LICENSE)
+[![Documentation](https://img.shields.io/badge/docs-potassco.org-blue)](https://docs.potassco.org/tempxplain/)
+[![PyPI version](https://img.shields.io/pypi/v/tempxplain)](https://pypi.org/project/tempxplain/)
+[![License](https://img.shields.io/github/license/potassco/tempxplain)](LICENSE)
 
-# fillname
+# tempxplain
 
 > Remove this block after following the instructions below to use the template.
 >
@@ -24,14 +24,14 @@ pip install .
 ## Documentation
 
 Full documentation is available at
-**[docs.potassco.org/fillname](https://docs.potassco.org/fillname/)**.
+**[docs.potassco.org/tempxplain](https://docs.potassco.org/tempxplain/)**.
 
 ## Usage
 
 Run the following for basic usage information:
 
 ```bash
-fillname -h
+tempxplain -h
 ```
 
 To generate and open the documentation, run

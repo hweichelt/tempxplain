@@ -4,7 +4,7 @@ hide:
   - toc
 ---
 
-# fillname
+# tempxplain
 
 !!! info
-    *fillname* is part of the [Potassco](https://potassco.org) suite.
+    *tempxplain* is part of the [Potassco](https://potassco.org) suite.
