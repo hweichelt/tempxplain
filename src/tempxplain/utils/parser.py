@@ -5,8 +5,9 @@ The command line parser for the project.
 from argparse import ArgumentParser
 from importlib import metadata
 from textwrap import dedent
-from typing import Any, Optional, cast
+from typing import Any, cast
 
+from ..server import DEFAULT_HOST, DEFAULT_PORT
 from . import logging
 
 __all__ = ["get_parser"]
@@ -34,7 +35,7 @@ def get_parser() -> ArgumentParser:
         ("debug", logging.DEBUG),
     ]
 
-    def get(levels: list[tuple[str, int]], name: str) -> Optional[int]:
+    def get(levels: list[tuple[str, int]], name: str) -> int | None:
         for key, val in levels:
             if key == name:
                 return val
@@ -48,6 +49,9 @@ def get_parser() -> ArgumentParser:
         help="set log level [%(default)s]",
         type=cast(Any, lambda name: get(levels, name)),
     )
+
+    parser.add_argument("--host", default=DEFAULT_HOST, help="address the server listens on [%(default)s]")
+    parser.add_argument("--port", default=DEFAULT_PORT, type=int, help="port the server listens on [%(default)s]")
 
     parser.add_argument("--version", "-v", action="version", version=f"%(prog)s {VERSION}")
     return parser

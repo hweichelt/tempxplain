@@ -2,13 +2,24 @@
     import "./app.css";
     import { ModeWatcher } from "mode-watcher";
     import ModeToggle from "$lib/components/ModeToggle.svelte";
+    import { backend } from "$lib/backend.svelte";
+
+    $effect(() => {
+        backend.connect().catch(() => {});
+        return () => backend.close();
+    });
 </script>
 
 <ModeWatcher />
 <div id="content">
     <header class="border-b p-4 flex items-center justify-between">
         <div>TempXplain</div>
-        <ModeToggle />
+        <div class="flex items-center gap-4">
+            <span class="text-sm text-muted-foreground">
+                {backend.connected ? "Connected" : "Disconnected"}
+            </span>
+            <ModeToggle />
+        </div>
     </header>
     <main>
         <div id="graph" class="p-4">GRAPH</div>
