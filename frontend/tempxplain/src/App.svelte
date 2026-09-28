@@ -4,6 +4,7 @@
     import ModeToggle from "$lib/components/ModeToggle.svelte";
     import ConnectionIndicator from "$lib/components/ConnectionIndicator.svelte";
     import { backend } from "$lib/backend.svelte";
+    import Badge from "$lib/components/ui/badge/badge.svelte";
 
     $effect(() => {
         backend.connect().catch(() => {});
@@ -23,8 +24,12 @@
     <main>
         <div id="graph" class="p-4">GRAPH</div>
         <div id="visualization" class="border-l grid grid-rows-2">
-            <div class="p-4">REF</div>
-            <div class="border-t p-4">FOIL</div>
+            <div class="p-4">
+                <Badge variant="secondary">REFERENCE</Badge>
+            </div>
+            <div class="border-t p-4">
+                <Badge variant="secondary">FOIL</Badge>
+            </div>
         </div>
         <div id="timeline" class="p-4 border-t">TIME</div>
     </main>
