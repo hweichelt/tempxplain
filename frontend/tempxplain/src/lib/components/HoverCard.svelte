@@ -1,7 +1,7 @@
 <svelte:options runes={true} />
 
 <script lang="ts">
-    import * as HoverCard from "$lib/components/ui/hover-card/index.ts";
+    import * as HoverCard from "$lib/components/ui/hover-card/index";
     import { fly } from "svelte/transition";
     import type { Snippet } from "svelte";
 
