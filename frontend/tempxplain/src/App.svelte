@@ -6,11 +6,16 @@
     import { backend } from "$lib/backend.svelte";
     import Badge from "$lib/components/ui/badge/badge.svelte";
     import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
+    import Slider from "$lib/components/ui/slider/slider.svelte";
 
     $effect(() => {
         backend.connect().catch(() => {});
         return () => backend.close();
     });
+
+    let timestep = $state(3);
+    let timestep_min = $state(0);
+    let timestep_max = $state(6);
 </script>
 
 <ModeWatcher />
@@ -45,7 +50,16 @@
                 </div>
             </div>
         </div>
-        <div id="timeline" class="p-4 border-t">TIME</div>
+        <div id="timeline" class="p-4 border-t">
+            <Slider
+                type="single"
+                bind:value={timestep}
+                min={timestep_min}
+                max={timestep_max}
+                step={1}
+                class="w-full"
+            />
+        </div>
     </main>
 </div>
 
