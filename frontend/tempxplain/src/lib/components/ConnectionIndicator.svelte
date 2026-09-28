@@ -1,19 +1,14 @@
 <script lang="ts">
-    import MoonIcon from "@lucide/svelte/icons/moon";
-    import SunIcon from "@lucide/svelte/icons/sun";
-    import { toggleMode } from "mode-watcher";
-    import { Button } from "$lib/components/ui/button/index.js";
-    import * as HoverCard from "$lib/components/ui/hover-card/index.js";
     import { backend } from "$lib/backend.svelte";
-    import { fly } from "svelte/transition";
+    import HoverCard from "$lib/components/HoverCard.svelte";
 
     let class_connected = $derived(
         backend.connected ? "connected" : "disconnected",
     );
 </script>
 
-<HoverCard.Root openDelay={200}>
-    <HoverCard.Trigger>
+<HoverCard class="w-56">
+    {#snippet trigger()}
         <div
             class="border w-8 h-8 flex justify-center items-center rounded-lg bg-background dark:bg-input/30"
         >
@@ -21,16 +16,14 @@
                 class="indicator w-3 h-3 rounded-full transition-colors {class_connected}"
             ></div>
         </div>
-    </HoverCard.Trigger>
-    <HoverCard.Content class="w-56">
-        <div class="grid grid-cols-[1fr_auto] items-center gap-2">
-            <div>Backend</div>
-            <div class="text-sm font-mono bg-card px-2 py-0.5 rounded-sm">
-                {backend.connected ? "Connected" : "Disconnected"}
-            </div>
+    {/snippet}
+    <div class="grid grid-cols-[1fr_auto] items-center gap-2">
+        <div>Backend</div>
+        <div class="text-sm font-mono bg-card px-2 py-0.5 rounded-sm">
+            {backend.connected ? "Connected" : "Disconnected"}
         </div>
-    </HoverCard.Content>
-</HoverCard.Root>
+    </div>
+</HoverCard>
 
 <style>
     .indicator.connected {
