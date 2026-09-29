@@ -6,7 +6,7 @@
     import { backend } from "$lib/backend.svelte";
     import Badge from "$lib/components/ui/badge/badge.svelte";
     import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
-    import Slider from "$lib/components/ui/slider/slider.svelte";
+    import Timeline from "$lib/components/Timeline.svelte";
 
     $effect(() => {
         backend.connect().catch(() => {});
@@ -51,13 +51,22 @@
             </div>
         </div>
         <div id="timeline" class="p-4 border-t">
-            <Slider
-                type="single"
-                bind:value={timestep}
-                min={timestep_min}
-                max={timestep_max}
-                step={1}
-                class="w-full"
+            <Timeline
+                interval={[0, 10]}
+                fluents={[
+                    "at(1)",
+                    "at(2)",
+                    "at(3)",
+                    "at(4)",
+                    "called(1)",
+                    "called(2)",
+                    "called(3)",
+                    "called(4)",
+                    "served(1)",
+                    "served(2)",
+                    "served(3)",
+                    "served(4)",
+                ]}
             />
         </div>
     </main>
@@ -66,14 +75,15 @@
 <style>
     #content {
         display: grid;
-        grid-template-rows: auto 1fr;
+        grid-template-rows: auto minmax(0, 1fr);
         width: 100vw;
         height: 100vh;
+        max-height: 100vh;
     }
     main {
         display: grid;
         grid-template-columns: 2fr 1fr;
-        grid-template-rows: 2fr 1fr;
+        grid-template-rows: minmax(0, 2fr) minmax(0, 1fr);
         grid-template-areas:
             "exp viz"
             "tim viz";
