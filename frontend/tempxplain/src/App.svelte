@@ -7,6 +7,7 @@
     import Badge from "$lib/components/ui/badge/badge.svelte";
     import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
     import Timeline from "$lib/components/Timeline.svelte";
+    import logo from "./assets/tempxplain.svg";
 
     $effect(() => {
         backend.connect().catch(() => {});
@@ -21,6 +22,7 @@
 <ModeWatcher />
 <div id="content">
     <header class="border-b p-4 flex items-center justify-between">
+        <img src={logo} alt="logo" class="size-8 invert" />
         <div>TempXplain</div>
         <div class="flex items-center gap-2">
             <ConnectionIndicator />
