@@ -13,6 +13,8 @@
     import text_light from "./assets/tempxplain_text_light.svg";
     import grad_dark from "./assets/gradient_color.png";
     import grad_light from "./assets/gradient_light.png";
+    import Button from "$lib/components/ui/button/button.svelte";
+    import { program_state } from "$lib/state/program_state.svelte";
 
     $effect(() => {
         backend.connect().catch(() => {});
@@ -54,6 +56,14 @@
             class="h-6 dark:invert dark:hidden"
         />
         <div class="flex items-center gap-2 p-4">
+            <Button
+                onclick={() =>
+                    console.log(program_state.set_program(":- a, not a."))}
+                >SET</Button
+            >
+            <Button onclick={() => console.log(program_state.program)}
+                >GET</Button
+            >
             <ConnectionIndicator />
             <ModeToggle />
         </div>
