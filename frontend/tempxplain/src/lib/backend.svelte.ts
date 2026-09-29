@@ -7,7 +7,15 @@ export interface Api {
   ping: { params: Record<string, never>; result: "pong" };
   set_program: { params: { program: string }; result: null };
   get_program: { params: Record<string, never>; result: string };
+  get_explanation: { params: Record<string, never>; result: Explanation };
 }
+
+export type Explanation = {
+  graph: string;
+  partitions: string[];
+  timeframe_full: [number, number];
+  timeframe_explanation: [number, number];
+};
 
 type Response = { id: number | null } & (
   | { result: unknown; error?: undefined }

@@ -15,6 +15,7 @@ or
 """
 
 import asyncio
+import dataclasses
 import inspect
 import json
 from collections.abc import Callable
@@ -38,6 +39,13 @@ class RpcError(Exception):
         super().__init__(message)
         self.kind = kind
         self.message = message
+
+
+def _to_json(value: object) -> object:
+    """Convert values that `json` cannot serialize by itself."""
+    if dataclasses.is_dataclass(value) and not isinstance(value, type):
+        return dataclasses.asdict(value)
+    raise TypeError(f"Object of type {type(value).__name__} is not JSON serializable")
 
 
 class Registry(Generic[State]):
@@ -101,7 +109,7 @@ class Registry(Generic[State]):
                 raise RpcError("InvalidRequest", "'params' must be an object")
             try:
                 result = await self.call(state, name, params)
-                return json.dumps({"id": request_id, "result": result})
+                return json.dumps({"id": request_id, "result": result}, default=_to_json)
             except RpcError:
                 raise
             except Exception as e:  # pylint: disable=broad-exception-caught

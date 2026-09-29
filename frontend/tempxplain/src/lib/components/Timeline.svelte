@@ -44,8 +44,11 @@
         {#each { length: span } as _, i (i)}
             <Button
                 variant="secondary"
-                class={t_class(i, "bg-primary text-primary-foreground")}
-                onclick={() => go_to(i)}>{i}</Button
+                class={t_class(
+                    interval[0] + i,
+                    "bg-primary text-primary-foreground",
+                )}
+                onclick={() => go_to(interval[0] + i)}>{interval[0] + i}</Button
             >
         {/each}
         <Button variant="secondary" size="icon" onclick={next}>

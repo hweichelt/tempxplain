@@ -21,9 +21,7 @@
         return () => backend.close();
     });
 
-    let timestep = $state(3);
-    let timestep_min = $state(0);
-    let timestep_max = $state(6);
+    let timeframe = $derived(program_state.explanation?.timeframe_explanation);
 </script>
 
 <ModeWatcher />
@@ -92,23 +90,27 @@
             </div>
         </div>
         <div id="timeline" class="p-4 border-t">
-            <Timeline
-                interval={[0, 10]}
-                fluents={[
-                    "at(1)",
-                    "at(2)",
-                    "at(3)",
-                    "at(4)",
-                    "called(1)",
-                    "called(2)",
-                    "called(3)",
-                    "called(4)",
-                    "served(1)",
-                    "served(2)",
-                    "served(3)",
-                    "served(4)",
-                ]}
-            />
+            {#if timeframe !== undefined}
+                <Timeline
+                    interval={timeframe}
+                    fluents={[
+                        "at(1)",
+                        "at(2)",
+                        "at(3)",
+                        "at(4)",
+                        "called(1)",
+                        "called(2)",
+                        "called(3)",
+                        "called(4)",
+                        "served(1)",
+                        "served(2)",
+                        "served(3)",
+                        "served(4)",
+                    ]}
+                />
+            {:else}
+                <Skeleton class="w-full h-full" />
+            {/if}
         </div>
     </main>
 </div>
