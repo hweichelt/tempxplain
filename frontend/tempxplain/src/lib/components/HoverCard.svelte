@@ -11,15 +11,13 @@
         content_align?: "start" | "center" | "end";
         trigger: Snippet;
         children: Snippet;
-        variant?: "default" | "error";
     }
     let {
         class: className,
         href,
-        content_align = "center",
+        content_align = "end",
         trigger,
         children,
-        variant = "default",
     }: HoverCardProps = $props();
 </script>
 
@@ -28,7 +26,7 @@
         {@render trigger()}
     </HoverCard.Trigger>
     <HoverCard.Content
-        class="w-80 {className} variant-{variant}"
+        class="w-80 {className} rounded-sm mt-1"
         forceMount
         side="bottom"
         align={content_align}

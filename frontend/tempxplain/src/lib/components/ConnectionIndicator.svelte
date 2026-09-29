@@ -19,7 +19,9 @@
     {/snippet}
     <div class="grid grid-cols-[1fr_auto] items-center gap-2">
         <div>Backend</div>
-        <div class="text-sm font-mono bg-card px-2 py-0.5 rounded-sm">
+        <div
+            class="label text-sm font-mono bg-card px-2 py-0.5 rounded-sm border-2 {class_connected}"
+        >
             {backend.connected ? "Connected" : "Disconnected"}
         </div>
     </div>
@@ -31,5 +33,13 @@
     }
     .indicator.disconnected {
         background: var(--color-destructive);
+    }
+    .label.connected {
+        border-color: var(--color-success);
+        background: color-mix(in srgb, var(--color-success) 25%, transparent);
+    }
+    .label.disconnected {
+        border-color: var(--color-destructive);
+        background: color-mix(in srgb, var(--color-success) 25%, transparent);
     }
 </style>
