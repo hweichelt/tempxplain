@@ -22,7 +22,7 @@
 <div id="content">
     <header class="border-b p-4 flex items-center justify-between">
         <div>TempXplain</div>
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
             <ConnectionIndicator />
             <ModeToggle />
         </div>
