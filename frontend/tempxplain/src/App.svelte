@@ -7,7 +7,12 @@
     import Badge from "$lib/components/ui/badge/badge.svelte";
     import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
     import Timeline from "$lib/components/Timeline.svelte";
-    import logo from "./assets/tempxplain.svg";
+    import logo_dark from "./assets/logo.svg";
+    import logo_light from "./assets/logo_light.svg";
+    import text_dark from "./assets/tempxplain_text.svg";
+    import text_light from "./assets/tempxplain_text_light.svg";
+    import grad_dark from "./assets/gradient_color.png";
+    import grad_light from "./assets/gradient_light.png";
 
     $effect(() => {
         backend.connect().catch(() => {});
@@ -21,10 +26,34 @@
 
 <ModeWatcher />
 <div id="content">
-    <header class="border-b p-4 flex items-center justify-between">
-        <img src={logo} alt="logo" class="size-8 invert" />
-        <div>TempXplain</div>
-        <div class="flex items-center gap-2">
+    <header class="border-b flex items-center justify-between">
+        <div class="h-full flex flex-row">
+            <div class="logo-bg h-full flex flex-row items-center pl-6 pr-6">
+                <img
+                    src={logo_dark}
+                    alt="logo"
+                    class="size-8 dark:invert not-dark:hidden"
+                />
+                <img
+                    src={logo_light}
+                    alt="logo"
+                    class="size-8 dark:invert dark:hidden"
+                />
+            </div>
+            <img src={grad_dark} alt="" class="h-16 not-dark:hidden" />
+            <img src={grad_light} alt="" class="h-16 dark:hidden" />
+        </div>
+        <img
+            src={text_dark}
+            alt="TempXplain"
+            class="h-6 dark:invert not-dark:hidden"
+        />
+        <img
+            src={text_light}
+            alt="TempXplain"
+            class="h-6 dark:invert dark:hidden"
+        />
+        <div class="flex items-center gap-2 p-4">
             <ConnectionIndicator />
             <ModeToggle />
         </div>
@@ -98,5 +127,8 @@
     }
     #timeline {
         grid-area: tim;
+    }
+    .logo-bg {
+        background: light-dark(#cfd8dc, #37474f);
     }
 </style>

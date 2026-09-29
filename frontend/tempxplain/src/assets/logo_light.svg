@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="90mm"
+   height="90mm"
+   viewBox="0 0 90 90"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   sodipodi:docname="logo_light.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="true"
+     inkscape:zoom="0.91668771"
+     inkscape:cx="93.816028"
+     inkscape:cy="110.72473"
+     inkscape:window-width="2327"
+     inkscape:window-height="1238"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <inkscape:grid
+       id="grid1"
+       units="mm"
+       originx="0"
+       originy="0"
+       spacingx="10"
+       spacingy="10"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="5"
+       enabled="true"
+       visible="true" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="rect2"
+       style="font-variation-settings:'wght' 200;fill:#37474f;stroke-width:8.99999;stroke-linecap:round;opacity:0.5;fill-opacity:1"
+       d="M 9.9999064 9.9999064 L 9.9999064 79.999768 L 79.999768 79.999768 L 79.999768 9.9999064 L 9.9999064 9.9999064 z M 19.999813 19.999813 L 69.999862 19.999813 L 69.999862 69.999862 L 19.999813 69.999862 L 19.999813 19.999813 z " />
+    <rect
+       style="font-variation-settings:'wght' 200;opacity:1;fill:#37474f;stroke-width:8.99999;stroke-linecap:round;fill-opacity:1"
+       id="rect3"
+       width="9.999999"
+       height="30.000002"
+       x="39.999996"
+       y="19.999998" />
+    <rect
+       style="font-variation-settings:'wght' 200;opacity:1;fill:#37474f;stroke-width:8.99999;stroke-linecap:round;fill-opacity:1"
+       id="rect5"
+       width="9.999999"
+       height="9.999999"
+       x="50"
+       y="39.999996" />
+    <rect
+       style="font-variation-settings:'wght' 200;opacity:1;fill:#37474f;stroke-width:8.99999;stroke-linecap:round;fill-opacity:1"
+       id="rect6"
+       width="70"
+       height="9.999999"
+       x="9.999999"
+       y="0" />
+    <rect
+       style="font-variation-settings:'wght' 200;opacity:1;fill:#37474f;stroke-width:8.99999;stroke-linecap:round;fill-opacity:1"
+       id="rect7"
+       width="9.999999"
+       height="70"
+       x="0"
+       y="9.999999" />
+    <rect
+       style="font-variation-settings:'wght' 200;opacity:1;fill:#37474f;stroke-width:8.99999;stroke-linecap:round;fill-opacity:1"
+       id="rect8"
+       width="9.9999971"
+       height="70"
+       x="80"
+       y="9.999999" />
+    <rect
+       style="font-variation-settings:'wght' 200;opacity:1;fill:#37474f;stroke-width:8.99999;stroke-linecap:round;fill-opacity:1"
+       id="rect9"
+       width="70"
+       height="9.999999"
+       x="9.999999"
+       y="79.999992" />
+  </g>
+</svg>
