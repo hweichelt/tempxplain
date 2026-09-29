@@ -30,7 +30,7 @@
     <main>
         <div id="graph" class="p-4 grid grid-rows-[auto_1fr] gap-4">
             <div class="flex flex-row gap-2 items-center">
-                <Badge variant="secondary">EXPLANATION GRAPH</Badge>
+                <Badge variant="secondary">EXPLANATION</Badge>
             </div>
             <div>
                 <Skeleton class="w-full h-full" />
