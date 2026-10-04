@@ -11,6 +11,7 @@ from .utils.logging import get_logger
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8765
+DEFAULT_FRONTEND_PORT = 8000
 
 log = get_logger("server")
 

@@ -40,6 +40,9 @@ tempxplain = "tempxplain.__main__:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+tempxplain = ["frontend/**"]
+
 [tool.setuptools_scm]
 version_scheme = "python-simplified-semver"
 local_scheme = "no-local-version"

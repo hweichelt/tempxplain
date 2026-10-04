@@ -7,7 +7,7 @@ from importlib import metadata
 from textwrap import dedent
 from typing import Any, cast
 
-from ..server import DEFAULT_HOST, DEFAULT_PORT
+from ..server import DEFAULT_FRONTEND_PORT, DEFAULT_HOST, DEFAULT_PORT
 from . import logging
 
 __all__ = ["get_parser"]
@@ -43,7 +43,7 @@ def get_parser() -> ArgumentParser:
 
     parser.add_argument(
         "--log",
-        default="warning",
+        default="info",
         choices=[val for _, val in levels],
         metavar=f"{{{','.join(key for key, _ in levels)}}}",
         help="set log level [%(default)s]",
@@ -52,6 +52,14 @@ def get_parser() -> ArgumentParser:
 
     parser.add_argument("--host", default=DEFAULT_HOST, help="address the server listens on [%(default)s]")
     parser.add_argument("--port", default=DEFAULT_PORT, type=int, help="port the server listens on [%(default)s]")
+    parser.add_argument(
+        "--port-frontend",
+        default=DEFAULT_FRONTEND_PORT,
+        type=int,
+        help="port the frontend is served on, 0 picks some free port [%(default)s]",
+    )
+    parser.add_argument("--no-frontend", action="store_true", help="only run the backend")
+    parser.add_argument("--no-open", action="store_true", help="do not open the frontend in a browser")
 
     parser.add_argument("--version", "-v", action="version", version=f"%(prog)s {VERSION}")
     return parser

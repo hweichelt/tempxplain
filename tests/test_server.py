@@ -3,6 +3,7 @@ Test cases for the communication with the frontend.
 """
 
 import json
+from dataclasses import dataclass
 from typing import Any
 from unittest import IsolatedAsyncioTestCase
 
@@ -39,12 +40,23 @@ class TestRpc(IsolatedAsyncioTestCase):
         async def compute_total(state: list[int]) -> int:
             return sum(state)
 
+        @dataclass
+        class Stats:
+            values: list[int]
+
+        @registry.method()
+        def stats(state: list[int]) -> Stats:
+            return Stats(values=state)
+
         state: list[int] = [1]
         self.assertEqual(
             await self.request(registry, state, {"id": 1, "method": "add", "params": {"value": 2}}),
             {"id": 1, "result": [1, 2]},
         )
         self.assertEqual(await self.request(registry, state, {"id": 2, "method": "total"}), {"id": 2, "result": 3})
+        self.assertEqual(
+            await self.request(registry, state, {"id": 3, "method": "stats"}), {"id": 3, "result": {"values": [1, 2]}}
+        )
 
         with self.assertRaises(ValueError):
             registry.method("add")(add)
@@ -98,4 +110,5 @@ class TestServer(IsolatedAsyncioTestCase):
                 self.assertEqual(await call(1, "ping"), {"id": 1, "result": "pong"})
                 self.assertEqual(await call(2, "set_program", program="a."), {"id": 2, "result": None})
                 self.assertEqual(await call(3, "get_program"), {"id": 3, "result": "a."})
+                self.assertEqual((await call(4, "get_explanation"))["result"]["timeframe_full"], [0, 10])
         self.assertEqual(state.program, "a.")

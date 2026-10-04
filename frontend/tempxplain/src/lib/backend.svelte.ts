@@ -123,5 +123,7 @@ export class Backend {
 }
 
 export const backend = new Backend(
-  import.meta.env.VITE_BACKEND_URL ?? `ws://${BACKEND_HOST}:${BACKEND_PORT}`,
+  new URLSearchParams(window.location.search).get("backend") ??
+    import.meta.env.VITE_BACKEND_URL ??
+    `ws://${BACKEND_HOST}:${BACKEND_PORT}`,
 );
