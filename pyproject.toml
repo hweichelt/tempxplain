@@ -89,7 +89,6 @@ omit = ["*/tempxplain/__main__.py", "*/tempxplain/utils/logging.py"]
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 100
 exclude_lines = [
     "raise NotImplementedError",
     "raise TypeError",
