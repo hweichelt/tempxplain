@@ -38,3 +38,5 @@ site
 
 # built frontend
 src/tempxplain/frontend/
+
+out/*

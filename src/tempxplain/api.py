@@ -4,8 +4,9 @@ The backend API.
 Functions are exposed by decorating them with `@rpc.method()`. Their return value has to be JSON serializable.
 """
 
-import time
 from dataclasses import dataclass
+
+from tempxplain.explain import explanation_graph
 
 from .rpc import Registry
 
@@ -70,6 +71,13 @@ def get_program_data(state: ServerState) -> ProgramData:
 @rpc.method()
 def get_explanation(state: ServerState) -> Explanation:
     """Get details of the logic program."""
+    eg = explanation_graph(
+        files=state.program_data.files,
+        constants={},
+        assumptions=set(),
+        model_program="",
+        query=state.query,
+    )
     return Explanation(
         graph="",
         partitions=[],

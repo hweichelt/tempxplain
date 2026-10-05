@@ -12,6 +12,7 @@ dynamic = ["version"]
 readme = "README.md"
 dependencies = [
     "clingo==5.8",
+    "asplain @ file:///${PROJECT_ROOT}/../../arbeit/asplain",
     "websockets>=14",
 ]
 
