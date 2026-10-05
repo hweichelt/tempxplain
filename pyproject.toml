@@ -21,7 +21,7 @@ Changelog = "https://github.com/potassco/tempxplain/blob/master/CHANGES.md"
 
 [project.optional-dependencies]
 lint = ["ruff"]
-typecheck = ["pytest", "ty"]
+typecheck = ["pytest", "ty", "setuptools"]
 test = ["pytest", "pytest-cov", "coverage[toml]"]
 doc = [
     "mkdocs",

@@ -1,0 +1,2 @@
+# Source distributions ship the built frontend (package data) instead of its sources.
+prune frontend

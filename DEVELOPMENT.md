@@ -6,6 +6,11 @@ To install the project in development mode, use the following command:
 pip install -e .[dev]
 ```
 
+Installing locally with pip builds the frontend in `frontend/tempxplain` with `npm` (build code in `setup.py`), so [Node.js] needs to be available.
+The built files are located in `src/tempxplain/frontend` and shipped with the package.
+To rebuild the frontend after changing it, run `npm run build` in `frontend/tempxplain` or reinstall the package with pip.
+During frontend development, you can start the backend with `tempxplain --no-frontend` and the frontend with `npm run dev`.
+
 To improve code quality, we use [nox] to run linters, type checkers, unit
 tests, and more. We recommend installing nox using [pipx] to have it available
 globally.
@@ -58,6 +63,7 @@ mkdocs serve
 ```
 
 [editable]: https://setuptools.pypa.io/en/latest/userguide/development_mode.html
+[node.js]: https://nodejs.org/
 [nox]: https://nox.thea.codes/en/stable/index.html
 [pipx]: https://pypa.github.io/pipx/
 [pre]: https://pre-commit.com/
