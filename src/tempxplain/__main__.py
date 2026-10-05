@@ -30,12 +30,14 @@ def run_backend(
     host: str,
     port: int,
     log: Logger,
+    query: str,
     files: list[str],
 ) -> None:
     """Start the backend in an async environment."""
     try:
         data = ProgramData(files=files)
-        asyncio.run(run_server(rpc, ServerState(data), host, port))
+        state = ServerState(data, query=query)
+        asyncio.run(run_server(rpc, state, host, port))
     except KeyboardInterrupt:
         log.info("server stopped")
 
@@ -68,7 +70,7 @@ def main() -> None:
     if not args.no_frontend:
         run_frontend(args.host, args.port_frontend, backend_url(args.host, args.port), log, not args.no_open)
 
-    run_backend(args.host, args.port, log, args.files)
+    run_backend(args.host, args.port, log, query=args.query, files=args.files)
 
 
 if __name__ == "__main__":

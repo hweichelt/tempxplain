@@ -57,6 +57,9 @@ def get_parser() -> ArgumentParser:
         metavar="FILE",
         help=f"logic program files to load, {SYMBOL_STDIN} reads from standard input",
     )
+    parser.add_argument(
+        "-q", "--query", required=True, help="the query that should be satisfied in the foil model. (negation with '-')"
+    )
 
     parser.add_argument("--host", default=DEFAULT_HOST, help="address the server listens on [%(default)s]")
     parser.add_argument("--port", default=DEFAULT_PORT, type=int, help="port the server listens on [%(default)s]")

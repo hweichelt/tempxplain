@@ -36,6 +36,7 @@ class ServerState:
     """
 
     program_data: ProgramData
+    query: str
     program: str = ""
 
 

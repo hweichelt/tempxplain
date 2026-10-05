@@ -33,4 +33,5 @@ async def run_server(registry: Registry[Any], state: object, host: str, port: in
     """Run the server until the task is cancelled."""
     async with await start_server(registry, state, host, port) as server:
         log.info(f"Listening on ws://{host}:{port}")
+        log.info(f"ServerState: {state}")
         await server.serve_forever()
