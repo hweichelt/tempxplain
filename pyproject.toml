@@ -10,7 +10,10 @@ requires-python = ">=3.11"
 license = { file = "LICENSE" }
 dynamic = ["version"]
 readme = "README.md"
-dependencies = ["websockets>=14"]
+dependencies = [
+    "clingo==5.8",
+    "websockets>=14",
+]
 
 [project.urls]
 Homepage = "https://github.com/potassco/tempxplain.git/"

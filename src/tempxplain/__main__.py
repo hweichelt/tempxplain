@@ -5,8 +5,11 @@ The main entry point for the application.
 import asyncio
 import sys
 from logging import Logger
+from pathlib import Path
 
-from .api import ServerState, rpc
+import clingo
+
+from .api import ProgramData, ServerState, rpc
 from .frontend import open_frontend, start_frontend
 from .server import run_server
 from .utils.logging import configure_logging, get_logger
@@ -27,10 +30,12 @@ def run_backend(
     host: str,
     port: int,
     log: Logger,
+    files: list[str],
 ) -> None:
     """Start the backend in an async environment."""
     try:
-        asyncio.run(run_server(rpc, ServerState(), host, port))
+        data = ProgramData(files=files)
+        asyncio.run(run_server(rpc, ServerState(data), host, port))
     except KeyboardInterrupt:
         log.info("server stopped")
 
@@ -57,9 +62,13 @@ def main() -> None:
     configure_logging(sys.stderr, args.log, sys.stderr.isatty())
 
     log = get_logger("main")
+    if len(args.files) == 0:
+        log.error("No program files provided.")
+        raise ValueError("tempxplain cannot be started without a program to explain.")
     if not args.no_frontend:
         run_frontend(args.host, args.port_frontend, backend_url(args.host, args.port), log, not args.no_open)
-    run_backend(args.host, args.port, log)
+
+    run_backend(args.host, args.port, log, args.files)
 
 
 if __name__ == "__main__":

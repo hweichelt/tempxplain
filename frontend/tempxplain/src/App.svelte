@@ -59,7 +59,7 @@
                     console.log(program_state.set_program(":- a, not a."))}
                 >SET</Button
             >
-            <Button onclick={() => console.log(program_state.program)}
+            <Button onclick={() => console.log(program_state.program_data)}
                 >GET</Button
             >
             <ConnectionIndicator />

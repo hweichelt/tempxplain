@@ -25,11 +25,17 @@ class Explanation:
 
 
 @dataclass
+class ProgramData:
+    files: list[str]
+
+
+@dataclass
 class ServerState:
     """
     State of the backend server.
     """
 
+    program_data: ProgramData
     program: str = ""
 
 
@@ -52,6 +58,12 @@ def set_program(state: ServerState, program: str) -> None:
 def get_program(state: ServerState) -> str:
     """Get the logic program."""
     return state.program
+
+
+@rpc.method()
+def get_program_data(state: ServerState) -> ProgramData:
+    """Get data for the input programs."""
+    return state.program_data
 
 
 @rpc.method()

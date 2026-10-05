@@ -1,0 +1,3 @@
+#include "included.lp".
+
+a.

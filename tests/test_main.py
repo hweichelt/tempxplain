@@ -32,3 +32,6 @@ class TestMain(TestCase):
         parser = get_parser()
         ret = parser.parse_args(["--log", "info"])
         self.assertEqual(ret.log, logging.INFO)
+        self.assertEqual(ret.files, [])
+        ret = parser.parse_args(["a.lp", "-", "b.lp"])
+        self.assertEqual(ret.files, ["a.lp", "-", "b.lp"])

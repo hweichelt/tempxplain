@@ -13,6 +13,7 @@ from . import logging
 __all__ = ["get_parser"]
 
 VERSION = metadata.version("tempxplain")
+SYMBOL_STDIN = "-"
 
 
 def get_parser() -> ArgumentParser:
@@ -48,6 +49,13 @@ def get_parser() -> ArgumentParser:
         metavar=f"{{{','.join(key for key, _ in levels)}}}",
         help="set log level [%(default)s]",
         type=cast(Any, lambda name: get(levels, name)),
+    )
+
+    parser.add_argument(
+        "files",
+        nargs="*",
+        metavar="FILE",
+        help=f"logic program files to load, {SYMBOL_STDIN} reads from standard input",
     )
 
     parser.add_argument("--host", default=DEFAULT_HOST, help="address the server listens on [%(default)s]")
