@@ -183,8 +183,12 @@ def parse_query_program(query: str) -> str:
     return get_query_prg(query_include, query_exclude)
 
 
-def parse_model(model_prg: str) -> set[str]:
-    """Parse a model program to get the model's symbol strings."""
+def parse_model(model_prg: str) -> list[str] | None:
+    """
+    Parse a model program to get the model's symbol strings.
+    """
+    if not model_prg.strip():
+        return None
     control_model = clingo.Control(["1", "--warn=none"])
     control_model.add(model_prg)
     control_model.ground([("base", [])])
@@ -193,7 +197,7 @@ def parse_model(model_prg: str) -> set[str]:
         symbols = set()
         for m in sh:
             symbols = {str(s) for s in m.symbols(atoms=True)}
-        return symbols
+        return list(symbols)
 
 
 def transform_temporal(symbols: Iterable[Symbol]) -> list[Symbol]:
@@ -206,7 +210,6 @@ def transform_temporal(symbols: Iterable[Symbol]) -> list[Symbol]:
             Transformation.FACT_RULES,
             Transformation.STATIC_DOMAIN_FACTS,
             Transformation.ORPHANS,
-            Transformation.INERTIA_CONDENSATION,
         ],
     )
 
@@ -231,7 +234,7 @@ def explanation(
         assumptions=list(assumptions),
         dynamic_tags_files=[],
     )
-    model_subgraphs_ctl = set_model_subgraphs_ctl(pg=reference_pg, ctl=control, model_symbols=list(model_symbols))
+    model_subgraphs_ctl = set_model_subgraphs_ctl(pg=reference_pg, ctl=control, model_symbols=model_symbols)
     with model_subgraphs_ctl.solve(yield_=True) as solve_handle:
         sh = cast(SolveHandle, solve_handle)
 

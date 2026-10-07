@@ -7,6 +7,8 @@ Functions are exposed by decorating them with `@rpc.method()`. Their return valu
 from dataclasses import dataclass
 from typing import Literal
 
+from asplain.utils.viz import viz_graph
+
 from tempxplain.explain import explanation
 
 from .rpc import Registry
@@ -80,6 +82,14 @@ def get_explanation(state: ServerState) -> Explanation:
         model_program="",
         query=state.query,
     )
+    print(f"MATRIX: {exp.fluent_matrix}")
+    with open("out/graph.lp", "w") as f:
+        f.write(exp.graph)
+        viz_graph(
+            pg=exp.graph,
+            title="Explanation Graph",
+            name="contrastive_pg",
+        )
     return Explanation(
         graph=exp.graph,
         partitions={t: [str(a.symbol) for a in atoms] for t, atoms in exp.partitions.items()},

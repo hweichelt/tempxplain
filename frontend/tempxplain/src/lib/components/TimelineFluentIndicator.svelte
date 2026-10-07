@@ -12,7 +12,7 @@
       "none": "bg-card",
       "ref": "bg-ref",
       "foil": "bg-foil",
-      "both": "bg-linear-90 from-foil to-ref",
+      "both": "bg-linear-90 from-foil from-25% to-ref to-75%",
     }
     let classes_active = $derived(active ? "active" : "");
 </script>
