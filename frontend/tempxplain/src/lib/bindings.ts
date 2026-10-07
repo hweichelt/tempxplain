@@ -6,6 +6,9 @@ export interface Api {
   get_explanation: { params: Record<string, never>; result: Explanation };
 }
 
+export type Model = "ref" | "foil";
+export type ModelMembership = "none" | "ref" | "foil" | "both";
+
 export type ProgramData = {
   files: string[];
 };
@@ -15,5 +18,5 @@ export type Explanation = {
   partitions: Record<number, string[]>;
   timeframe_full: [number, number];
   timeframe_explanation: [number, number];
-  fluent_matrix: Record<string, string[]>;
+  fluent_matrix: Record<string, ModelMembership[]>;
 };

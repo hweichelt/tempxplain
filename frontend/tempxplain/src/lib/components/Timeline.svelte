@@ -3,10 +3,12 @@
     import { ChevronRight, ChevronLeft } from "@lucide/svelte";
     import Skeleton from "./ui/skeleton/skeleton.svelte";
     import FluentLabel from "./FluentLabel.svelte";
+    import TimelineFluentIndicator from "./TimelineFluentIndicator.svelte";
+    import type { ModelMembership } from "$lib/bindings";
 
     interface TimelineProps {
         interval: [number, number];
-        fluents: Record<string, string[]>;
+        fluents: Record<string, ModelMembership[]>;
     }
     let { interval, fluents }: TimelineProps = $props();
 
@@ -63,7 +65,7 @@
         {#each Object.entries(fluents).sort() as [fluent, values]}
             <FluentLabel {fluent} />
             {#each { length: span } as _, t (t)}
-                <div class="px-3 py-1 rounded-md bg-card">{values[t]}</div>
+                <TimelineFluentIndicator fluent={fluent} membership={values[t]} active={t === timestep_current} />
             {/each}
             <div class="w-8"></div>
         {/each}
