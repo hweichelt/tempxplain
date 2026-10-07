@@ -7,7 +7,7 @@ Functions are exposed by decorating them with `@rpc.method()`. Their return valu
 from dataclasses import dataclass
 from typing import Literal
 
-from tempxplain.explain import explanation_graph
+from tempxplain.explain import explanation
 
 from .rpc import Registry
 
@@ -21,9 +21,10 @@ class Explanation:
     """
 
     graph: str
-    partitions: list[str]
+    partitions: dict[int, list[str]]
     timeframe_full: tuple[int, int]
     timeframe_explanation: tuple[int, int]
+    fluent_matrix: dict[str, list[str]]
 
 
 @dataclass
@@ -72,7 +73,7 @@ def get_program_data(state: ServerState) -> ProgramData:
 @rpc.method()
 def get_explanation(state: ServerState) -> Explanation:
     """Get details of the logic program."""
-    eg = explanation_graph(
+    exp = explanation(
         files=state.program_data.files,
         constants={},
         assumptions=set(),
@@ -80,8 +81,9 @@ def get_explanation(state: ServerState) -> Explanation:
         query=state.query,
     )
     return Explanation(
-        graph="",
-        partitions=[],
-        timeframe_full=(0, 10),
-        timeframe_explanation=(2, 8),
+        graph=exp.graph,
+        partitions={t: [str(a.symbol) for a in atoms] for t, atoms in exp.partitions.items()},
+        timeframe_full=exp.interval,
+        timeframe_explanation=exp.interval,
+        fluent_matrix={str(f): [m.value for m in membership] for f, membership in exp.fluent_matrix.items()},
     )

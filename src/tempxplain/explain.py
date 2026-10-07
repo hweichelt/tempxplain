@@ -1,16 +1,20 @@
 """Functionality for generating the explanations with asplain."""
 
 from collections.abc import Iterable
+from dataclasses import dataclass
+from enum import Enum
+from functools import cached_property
 from pathlib import Path
-from typing import cast
+from typing import Literal, cast, get_args
 
 import clingo
-from asplain import Foil, construct_program_graph, set_foil_ctl, set_model_subgraphs_ctl
+from asplain import construct_program_graph, set_foil_ctl, set_model_subgraphs_ctl
 from asplain.transformations.transformers import Transformation, apply_transformation_sequence
 from asplain.utils.clingo import get_query_prg, symbols_to_prg
 from clingo import SolveHandle, Symbol
 from clingo.script import enable_python
 
+from tempxplain.temporal import AtomType, atom_base, atom_time, atom_type, is_action, is_fluent
 from tempxplain.utils.logging import get_logger
 
 from .utils.io import read_file
@@ -25,6 +29,149 @@ enable_python()
 DEFAULT_COST_ENCODING = Path(__file__).parent / "encodings" / "cost" / "default.lp"
 NUMBER_OF_EXPLANATIONS = 1
 QUERY_NEGATION_PREFIX = "-"
+
+
+MODEL_STRING_REF_TYPE = Literal["ref"]
+MODEL_STRING_REF = get_args(MODEL_STRING_REF_TYPE)[0]
+MODEL_STRING_FOIL_TYPE = Literal["foil"]
+MODEL_STRING_FOIL = get_args(MODEL_STRING_FOIL_TYPE)[0]
+
+
+class Model(Enum):
+    REFERENCE = MODEL_STRING_REF
+    FOIL = MODEL_STRING_FOIL
+
+
+class ModelMembership(Enum):
+    NONE = "none"
+    REFERENCE = "ref"
+    FOIL = "foil"
+    BOTH = "both"
+
+    @classmethod
+    def from_set(cls, models: set[Model]) -> "ModelMembership":
+        match list(models):
+            case []:
+                return cls.NONE
+            case [Model.REFERENCE]:
+                return cls.REFERENCE
+            case [Model.FOIL]:
+                return cls.FOIL
+            case _:
+                return cls.BOTH
+
+
+@dataclass(frozen=True)
+class Atom:
+    symbol: Symbol
+    models: set[Model]
+
+    @cached_property
+    def type(self) -> AtomType:
+        return atom_type(self.symbol)
+
+    @cached_property
+    def time(self) -> int | None:
+        return atom_time(self.symbol)
+
+    @cached_property
+    def base(self) -> Symbol:
+        return atom_base(self.symbol)
+
+    @cached_property
+    def membership(self) -> ModelMembership:
+        return ModelMembership.from_set(self.models)
+
+    @cached_property
+    def is_fluent(self) -> bool:
+        return is_fluent(self.symbol)
+
+    @cached_property
+    def is_action(self) -> bool:
+        return is_action(self.symbol)
+
+    def __hash__(self) -> int:
+        """Hash based on symbol and its model membership."""
+        return hash((self.symbol, self.membership))
+
+
+@dataclass(frozen=True)
+class Explanation:
+    symbols: set[Symbol]
+
+    @cached_property
+    def graph(self) -> str:
+        return "\n".join(f"{str(s)}." for s in self.symbols)
+
+    @cached_property
+    def atoms_explanation(self) -> set[Atom]:
+        # collect symbols indicating model associations
+        models: dict[Symbol, set[Model]] = {}
+        for symbol in self.symbols:
+            if symbol.match("model", 2):
+                atom = symbol.arguments[0]
+                model = Model(str(symbol.arguments[1]))
+                models.setdefault(atom, set()).add(model)
+        print("MODELS", models)
+        print()
+        # collect node atoms, then associate them with their models
+        atoms = set()
+        for symbol in self.symbols:
+            if symbol.match("node", 2) and str(symbol.arguments[1]) == "atom":
+                atom = symbol.arguments[0]
+                atom_models = models.get(atom, set())
+                atoms.add(Atom(atom, atom_models))
+        print("ATOMS", atoms)
+        return atoms
+
+    @cached_property
+    def atoms_static(self) -> set[Atom]:
+        static: set[Atom] = set()
+        for atom in self.atoms_explanation:
+            if atom.time is None:
+                static.add(atom)
+        return static
+
+    @cached_property
+    def atoms_timed(self) -> set[Atom]:
+        timed: set[Atom] = set()
+        for atom in self.atoms_explanation:
+            if atom.time is not None:
+                timed.add(atom)
+        return timed
+
+    @cached_property
+    def fluents(self) -> set[Atom]:
+        return {a for a in self.atoms_timed if a.is_fluent}
+
+    @cached_property
+    def actions(self) -> set[Atom]:
+        return {a for a in self.atoms_timed if a.is_action}
+
+    @cached_property
+    def partitions(self) -> dict[int, set[Atom]]:
+        partitions: dict[int, set[Atom]] = {}
+        for atom in self.atoms_timed:
+            if (timepoint := atom.time) is not None:
+                partitions.setdefault(timepoint, set()).add(atom)
+        return partitions
+
+    @cached_property
+    def interval(self) -> tuple[int, int]:
+        return min(self.partitions), max(self.partitions)
+
+    @cached_property
+    def length(self) -> int:
+        return self.interval[1] - self.interval[0] + 1
+
+    @cached_property
+    def fluent_matrix(self) -> dict[Symbol, list[ModelMembership]]:
+        fluent_bases = {a.base for a in self.fluents}
+        matrix = {a: [ModelMembership.NONE] * self.length for a in fluent_bases}
+        for atom in self.fluents:
+            assert atom.time is not None  # make sure time is not None
+            matrix[atom.base][atom.time] = atom.membership
+        return matrix
 
 
 def parse_query_program(query: str) -> str:
@@ -67,13 +214,13 @@ def transform_temporal(symbols: Iterable[Symbol]) -> list[Symbol]:
     )
 
 
-def explanation_graph(
+def explanation(
     files: list[str],
     constants: dict[str, str],
     assumptions: set[tuple[str, bool]],
     model_program: str,
     query: str,
-) -> set[Symbol]:
+) -> Explanation:
     """Compute the explanation graph for a given program with query."""
     # Pre-Processing & Setup
     query_prg = parse_query_program(query)
@@ -110,7 +257,7 @@ def explanation_graph(
                         log.debug(f"Skipping non-optimal foil model {foil_model.number}")
                         continue
                     explanation_symbols = transform_temporal(list(foil_model.symbols(shown=True)))
-                    return set(explanation_symbols)
+                    return Explanation(set(explanation_symbols))
                 log.warning("No foil found.")
 
         if not model_found:
@@ -129,7 +276,6 @@ def explanation_graph(
                         log.info(f"Skipping non-optimal foil model {foil_model.number}")
                         continue
                     explanation_symbols = transform_temporal(list(foil_model.symbols(shown=True)))
-                    return set(explanation_symbols)
+                    return Explanation(set(explanation_symbols))
                 log.warning("No foil found.")
-
-    return set()
+    raise RuntimeError("No explanation graph found.")

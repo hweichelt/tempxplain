@@ -1,6 +1,6 @@
 % Elevator Temporal Example
 
-% @time(T) :: occur(A,T)
+% @time(T) :: occurs(A,T)
 % @time(T) :: holds(F,T)
 
 
@@ -20,34 +20,34 @@ fluent(ready).
 
 % ACTION GENERATION
 
-% @label("At time {} action {} occurs",(T,A,))
+% @label("At time {} action {} occurss",(T,A,))
 % @time(T)
-{occur(A,T): action(A)} :- time(T),time(T+1).
+{occurs(A,T): action(A)} :- time(T),time(T+1).
 % @label("At time {} there cannot be two actions {} and {} at the same time.",(T,A1,A2,))
 % @time(T)
-:- time(T), time(T+1), occur(A1,T), occur(A2,T), A1!=A2.
+:- time(T), time(T+1), occurs(A1,T), occurs(A2,T), A1!=A2.
 
 % ACTION CONDITIONS
 
 % @label("The elevator cannot move up at time {} since it is already at the top floor {}",(T,X,))
 % @time(T)
-:- occur(up,T),   holds(at(X),T), not floor(X+1).
+:- occurs(up,T),   holds(at(X),T), not floor(X+1).
 % @label("The elevator cannot down up at time {} since it is already at the bottom floor {}",(T,X,))
 % @time(T)
-:- occur(down,T), holds(at(X),T), not floor(X-1).
+:- occurs(down,T), holds(at(X),T), not floor(X-1).
 
 % CAUSAL RULES
 
 % Compute at positions from move actions
 % @label("The elevator moves from floor {} up at time {} since action up is chosen",(X,T,))
 % @time(T)
-holds(at(X+1),T+1) :- occur(up,T),   holds(at(X),T).
+holds(at(X+1),T+1) :- occurs(up,T),   holds(at(X),T).
 % @label("The elevator moves from floor {} down at time {} since action down is chosen",(X,T,))
 % @time(T)
-holds(at(X-1),T+1) :- occur(down,T), holds(at(X),T).
-% @label("Serve floor {} at time {} when serve action occurs on floor {}",(X,T,X))
+holds(at(X-1),T+1) :- occurs(down,T), holds(at(X),T).
+% @label("Serve floor {} at time {} when serve action occurss on floor {}",(X,T,X))
 % @time(T)
-holds(served(X),T) :- holds(at(X),T), occur(serve,T).
+holds(served(X),T) :- holds(at(X),T), occurs(serve,T).
 % Compute ready
 % @label("The elevator is ready at time {} if at that time is was called to floor {} and also is at that floor",(T,X,))
 % @time(T)
@@ -58,7 +58,7 @@ holds(ready,T) :- holds(called(X),T), holds(at(X),T).
 % @label("The elevator doesn't change its floor at time {} since action wait is chosen",(T,))
 % @time(T)
 % @inertia
-holds(at(X),T+1) :- holds(at(X),T), not occur(up,T), not occur(down,T), time(T).
+holds(at(X),T+1) :- holds(at(X),T), not occurs(up,T), not occurs(down,T), time(T).
 % @label("Call elevator for floor {} at {} if elevator was called before and not served",(X,T+1,))
 % @time(T)
 % @inertia
