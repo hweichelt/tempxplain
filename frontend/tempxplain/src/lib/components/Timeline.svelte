@@ -6,7 +6,7 @@
 
     interface TimelineProps {
         interval: [number, number];
-        fluents: string[];
+        fluents: Record<string, string[]>;
     }
     let { interval, fluents }: TimelineProps = $props();
 
@@ -60,10 +60,10 @@
         style:grid-template-columns={grid_cols_steps}
     >
         <!-- FLUENTS -->
-        {#each fluents as fluent}
+        {#each Object.entries(fluents).sort() as [fluent, values]}
             <FluentLabel {fluent} />
-            {#each { length: span } as _, i (i)}
-                <Skeleton />
+            {#each { length: span } as _, t (t)}
+                <div class="px-3 py-1 rounded-md bg-card">{values[t]}</div>
             {/each}
             <div class="w-8"></div>
         {/each}

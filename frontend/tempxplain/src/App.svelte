@@ -22,6 +22,7 @@
     });
 
     let timeframe = $derived(program_state.explanation?.timeframe_explanation);
+    let fluents = $derived(program_state.explanation?.fluent_matrix);
 </script>
 
 <ModeWatcher />
@@ -90,23 +91,10 @@
             </div>
         </div>
         <div id="timeline" class="p-4 border-t">
-            {#if timeframe !== undefined}
+            {#if timeframe !== undefined && fluents !== undefined}
                 <Timeline
                     interval={timeframe}
-                    fluents={[
-                        "at(1)",
-                        "at(2)",
-                        "at(3)",
-                        "at(4)",
-                        "called(1)",
-                        "called(2)",
-                        "called(3)",
-                        "called(4)",
-                        "served(1)",
-                        "served(2)",
-                        "served(3)",
-                        "served(4)",
-                    ]}
+                    fluents={fluents}
                 />
             {:else}
                 <Skeleton class="w-full h-full" />
