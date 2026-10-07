@@ -112,8 +112,6 @@ class Explanation:
                 atom = symbol.arguments[0]
                 model = Model(str(symbol.arguments[1]))
                 models.setdefault(atom, set()).add(model)
-        print("MODELS", models)
-        print()
         # collect node atoms, then associate them with their models
         atoms = set()
         for symbol in self.symbols:
@@ -121,7 +119,6 @@ class Explanation:
                 atom = symbol.arguments[0]
                 atom_models = models.get(atom, set())
                 atoms.add(Atom(atom, atom_models))
-        print("ATOMS", atoms)
         return atoms
 
     @cached_property
