@@ -5,6 +5,7 @@ Functions are exposed by decorating them with `@rpc.method()`. Their return valu
 """
 
 from dataclasses import dataclass
+from typing import Literal
 
 from tempxplain.explain import explanation_graph
 
@@ -45,7 +46,7 @@ rpc: Registry[ServerState] = Registry()
 
 
 @rpc.method()
-def ping(_state: ServerState) -> str:
+def ping(_state: ServerState) -> Literal["pong"]:
     """Check that the backend is online and reachable."""
     return "pong"
 

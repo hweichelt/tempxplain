@@ -1,8 +1,5 @@
-import {
-  backend,
-  type Explanation,
-  type ProgramData,
-} from "$lib/backend.svelte";
+import { backend } from "$lib/backend.svelte";
+import type { Explanation, ProgramData } from "$lib/bindings";
 
 class ProgramState {
   program: string | undefined = $state();
