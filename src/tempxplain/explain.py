@@ -27,8 +27,6 @@ enable_python()
 DEFAULT_COST_ENCODING = Path(__file__).parent / "encodings" / "cost" / "default.lp"
 NUMBER_OF_EXPLANATIONS = 1
 QUERY_NEGATION_PREFIX = "-"
-
-
 MODEL_STRING_REF_TYPE = Literal["ref"]
 MODEL_STRING_REF: Literal["ref"] = get_args(MODEL_STRING_REF_TYPE)[0]
 MODEL_STRING_FOIL_TYPE = Literal["foil"]
@@ -106,7 +104,10 @@ class Atom:
 @dataclass(frozen=True)
 class Explanation:
     symbols: set[Symbol]
-    symbols_transformed: set[Symbol]
+
+    @cached_property
+    def symbols_transformed(self) -> set[Symbol]:
+        return set(transform_temporal(self.symbols))
 
     @cached_property
     def graph(self) -> str:
@@ -293,8 +294,7 @@ def explanation(
                     if not foil_model.optimality_proven:
                         log.debug(f"Skipping non-optimal foil model {foil_model.number}")
                         continue
-                    explanation_symbols = transform_temporal(list(foil_model.symbols(shown=True)))
-                    return Explanation(set(foil_model.symbols(shown=True)), set(explanation_symbols))
+                    return Explanation(set(foil_model.symbols(shown=True)))
                 log.warning("No foil found.")
 
         if not model_found:
@@ -312,7 +312,6 @@ def explanation(
                     if not foil_model.optimality_proven:
                         log.info(f"Skipping non-optimal foil model {foil_model.number}")
                         continue
-                    explanation_symbols = transform_temporal(list(foil_model.symbols(shown=True)))
-                    return Explanation(set(foil_model.symbols(shown=True)), set(explanation_symbols))
+                    return Explanation(set(foil_model.symbols(shown=True)))
                 log.warning("No foil found.")
     raise RuntimeError("No explanation graph found.")
