@@ -52,14 +52,12 @@ class ModelMembership(Enum):
 
     @classmethod
     def from_model(cls, model: Model) -> "ModelMembership":
+        """Construct a model membership from a model."""
         return cls(model.value)
-
-    def has(self, model: Model) -> bool:
-        """Check whether the membership includes the given model."""
-        return self in (ModelMembership.BOTH, ModelMembership.from_model(model))
 
     @classmethod
     def from_set(cls, models: set[Model]) -> "ModelMembership":
+        """Construct a model membership from a set of models."""
         match list(models):
             case []:
                 return cls.NONE
@@ -67,6 +65,10 @@ class ModelMembership(Enum):
                 return cls.from_model(model)
             case _:
                 return cls.BOTH
+
+    def has(self, model: Model) -> bool:
+        """Check whether the membership includes the given model."""
+        return self in (ModelMembership.BOTH, ModelMembership.from_model(model))
 
 
 @dataclass(frozen=True)
