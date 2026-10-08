@@ -9,7 +9,7 @@ from typing import Literal
 from tempxplain.server import ServerState
 
 from .bindings import Explanation, ProgramData
-from .explain import MODEL_STRING_FOIL_TYPE, MODEL_STRING_REF_TYPE
+from .explain import MODEL_STRING_FOIL_TYPE, MODEL_STRING_REF_TYPE, Model
 from .rpc import Registry
 from .utils.logging import get_logger
 from .visualize import visualize_domain
@@ -43,7 +43,7 @@ def get_visualization(state: ServerState, model: MODEL_STRING_REF_TYPE | MODEL_S
     """Get the domain visualization of the specified model at time `t` as a base64 svg."""
     if state.program_data.viz_file is None:
         return None
-    return visualize_domain(state, model, t)
+    return visualize_domain(state, Model(model), t)
 
 
 @rpc.method()
@@ -56,6 +56,7 @@ def get_program_data(state: ServerState) -> ProgramData:
 def get_explanation(state: ServerState) -> Explanation:
     """Get details of the logic program."""
     exp = state.explanation
+    visualize_domain(state, Model.FOIL, 2)
     return Explanation(
         graph=exp.graph,
         partitions={t: [str(a.symbol) for a in atoms] for t, atoms in exp.partitions_transformed.items()},

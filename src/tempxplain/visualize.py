@@ -1,41 +1,48 @@
 """Visualization utilities for the tempxplain backend."""
 
+import base64
+
 from clingo import Control
-from clingo.script import enable_python
 from clingraph.clingo_utils import ClingraphContext
-from clingraph.graphviz import compute_graphs, render
+from clingraph.graphviz import compute_graphs
 from clingraph.orm import Factbase
+from graphviz import Digraph
 
 from tempxplain.utils.logging import get_logger
 from tempxplain.utils.symbols import to_program
 
-from .api import ServerState
-from .explain import MODEL_STRING_FOIL_TYPE, MODEL_STRING_REF_TYPE, Model
+from .explain import Model
+from .server import ServerState
 
-DPI = 80
+__all__ = ["visualize_domain"]
 
+ENGINE = "neato"
+FORMAT = "svg"
 
 log = get_logger("tempxplain.visualize")
 
 
-def visualize_domain(state: ServerState, model: MODEL_STRING_REF_TYPE | MODEL_STRING_FOIL_TYPE, t: int) -> str | None:
-    """Visualize the domain of the model at time step t with clingraph."""
+def visualize_domain(state: ServerState, model: Model, t: int, save: bool = True) -> str | None:
+    """
+    Visualize the domain of the model at time step `t` with clingraph.
+    """
     if state.program_data.viz_file is None:
         log.warning("No visualization file was provided, so nothing was rendered.")
         return None
-    fb = Factbase(prefix="v")
-    ctl = Control(["--warn=none", "--const", f"setdpi={DPI}"])
-    model_state_t = state.explanation.get_model_state_at(Model(model), t)
-    ctl.add("base", [], to_program(model_state_t))
+    ctl = Control(["1", "--warn=none"])  # limit to 1 model (no warnings)
+    ctl.add("base", [], to_program(state.explanation.get_model_state_at(model, t)))
     ctl.load(state.program_data.viz_file)
-    enable_python()
     ctl.ground([("base", [])], context=ClingraphContext())
+    fb = Factbase()
     ctl.solve(on_model=fb.add_model)
-    graphs = compute_graphs(fb, graphviz_type="directed")
-    files = render(graphs, view=False, directory="out", name_format=f"{model}-{t}", format="svg")
-    # TODO : Open file and convert to base64, then return
-    if len(files) == 0:
-        log.warning("No graph images were rendered.")
-        return graphs
-    log.info("Graph image saved in: %s", files["explanation"])
-    return graphs
+
+    graphs: dict[str, Digraph] = compute_graphs(fb, graphviz_type="directed")
+    # Get first (and only) graph
+    name, graph = next(iter(graphs.items()))
+    log.debug(f"Rendering graph '{name}' for model {model.value} at t={t}")
+    svg = graph.pipe(format=FORMAT, engine=ENGINE)
+    if save:
+        log.debug(f"Saving graph '{name}' for model {model.value} at t={t}")
+        with open(f"out/{model.value}-{t}.{FORMAT}", "wb") as f:
+            f.write(svg)
+    return base64.b64encode(svg).decode("ascii")
