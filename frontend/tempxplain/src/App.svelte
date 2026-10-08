@@ -58,14 +58,6 @@
             class="h-6 dark:invert dark:hidden"
         />
         <div class="flex items-center gap-2 p-4">
-            <Button
-                onclick={() =>
-                    console.log(program_state.set_program(":- a, not a."))}
-                >SET</Button
-            >
-            <Button onclick={() => console.log(program_state.program_data)}
-                >GET</Button
-            >
             <ConnectionIndicator />
             <ModeToggle />
         </div>
