@@ -16,7 +16,7 @@ class VisualizationState {
       if (result === null) {
         return undefined;
       }
-      image = `data:image/svg+xml;base64,${result}`;
+      image = result;
       this.#cache.set(key, image);
     }
     return image;

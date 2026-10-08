@@ -20,7 +20,9 @@
         {#if image === undefined}
             <div class="text-foreground bg-destructive px-4 py-1 text-sm rounded-full">Visualization Error</div>
         {:else}
-            <img src={image} alt="Visualization of the {model} model" class="h-full w-full object-contain"/>
+            <div class="visualization h-full w-full" role="img" aria-label="Visualization of the {model} model">
+                {@html image}
+            </div>
         {/if}
       {:catch error}
           <div class="text-foreground bg-destructive px-4 py-1 text-sm rounded-full">{error.message}</div>
@@ -29,3 +31,38 @@
     <div class="text-muted-foreground">No Visualization Specified</div>
   {/if}
 </div>
+
+<style>
+    .visualization :global(svg) {
+        width: 100%;
+        height: 100%;
+    }
+    .visualization :global(text) {
+        font-family: "JetBrains Mono";
+    }
+
+    /* Generic styling rules for the different properties */
+    .visualization :global([class*="vb-"] :is(ellipse, polygon)) {
+        fill: var(--b);
+    }
+    .visualization :global([class*="vt-"] text) {
+        fill: var(--t);
+    }
+    .visualization :global([class*="vs-"] :is(ellipse, polygon)) {
+        stroke: var(--s);
+    }
+
+    /* BACKGROUND */
+    .visualization :global(.vb-red) { --b: light-dark(var(--color-red-400), var(--color-red-500)); }
+    .visualization :global(.vb-green) { --b: light-dark(var(--color-green-400), var(--color-green-600)); }
+    .visualization :global(.vb-gray-2) { --b: light-dark(var(--color-gray-300), var(--color-gray-800)); }
+    .visualization :global(.vb-gray-3) { --b: light-dark(var(--color-gray-500), var(--color-gray-600)); }
+
+    /* TEXT */
+    .visualization :global(.vt-foreground) { --t: var(--foreground); }
+    .visualization :global(.vt-muted-foreground) { --t: var(--muted-foreground); }
+    .visualization :global(.vt-gray-3) { --t: light-dark(var(--color-gray-500), var(--color-gray-600)); }
+
+    /* STROKE */
+    .visualization :global(.vs-gray-3) { --s: light-dark(var(--color-gray-500), var(--color-gray-600)); }
+</style>

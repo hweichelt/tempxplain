@@ -40,7 +40,7 @@ def get_program(state: ServerState) -> str:
 
 @rpc.method()
 def get_visualization(state: ServerState, model: MODEL_STRING_REF_TYPE | MODEL_STRING_FOIL_TYPE, t: int) -> str | None:
-    """Get the domain visualization of the specified model at time `t` as a base64 svg."""
+    """Get the domain visualization of the specified model at time `t` as svg."""
     if state.program_data.viz_file is None:
         return None
     return visualize_domain(state, Model(model), t)

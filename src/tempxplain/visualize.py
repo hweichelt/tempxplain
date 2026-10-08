@@ -1,6 +1,6 @@
 """Visualization utilities for the tempxplain backend."""
 
-import base64
+import re
 
 from clingo import Control
 from clingraph.clingo_utils import ClingraphContext
@@ -18,6 +18,7 @@ __all__ = ["visualize_domain"]
 
 ENGINE = "neato"
 FORMAT = "svg"
+SVG_PREAMBLE = re.compile(r"^.*?(?=<svg)", re.DOTALL)
 
 log = get_logger("tempxplain.visualize")
 
@@ -45,4 +46,4 @@ def visualize_domain(state: ServerState, model: Model, t: int, save: bool = True
         log.debug(f"Saving graph '{name}' for model {model.value} at t={t}")
         with open(f"out/{model.value}-{t}.{FORMAT}", "wb") as f:
             f.write(svg)
-    return base64.b64encode(svg).decode("ascii")
+    return SVG_PREAMBLE.sub("", svg.decode("utf-8"), count=1)
