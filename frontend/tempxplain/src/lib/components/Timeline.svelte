@@ -16,6 +16,7 @@
 
     let span = $derived(interval[1] + 1 - interval[0]);
     let grid_cols_steps = $derived(`9rem repeat(${span}, 1fr)`);
+    let timestep_width = $state(0);
 
     function t_class(t: number, c: string): string {
         return timestep === t ? c : "";
@@ -41,16 +42,54 @@
         {/each}
     </div>
     <div
-        class="grid overflow-y-scroll"
+        class="grid relative overflow-y-scroll"
         style:grid-template-columns={grid_cols_steps}
     >
         <!-- FLUENTS -->
         {#each Object.entries(fluents).sort() as [fluent, values]}
             <FluentLabel {fluent} />
             {#each { length: span } as _, t (t)}
-                <TimelineFluentIndicator fluent={fluent} membership={values[t]} active={t === timestep} model_filter={filter} />
+                <div bind:clientWidth={timestep_width}>
+                    <TimelineFluentIndicator fluent={fluent} membership={values[t]} active={t === timestep} model_filter={filter} />
+                </div>
             {/each}
         {/each}
+        <div class="absolute top-0 bottom-0 left-[9rem] right-0 overflow-hidden">
+            <div id="current" class="absolute border-2 border-foreground border-t-transparent border-b-transparent" style:--step-size={`${timestep_width}px`} style:--step={timestep}>            </div>
+        </div>
     </div>
     <div></div>
 </div>
+
+<style>
+    #current {
+        --border-width: 2px;
+
+        width: var(--step-size);
+        height: calc(100% + 2 * var(--border-width));
+        top: calc(-1 * var(--border-width));
+        left: calc(0.1rem + var(--step) * (var(--step-size) + 0.01rem));
+        transition: left 100ms;
+        z-index: 10;
+    }
+    #current:before,
+    #current:after{
+        --width: 10rem;
+        --border-width: 2px;
+        --gradient-alpha: 25%;
+        --gradient-color: var(--color-black);
+        content: '';
+        position: absolute;
+        top: calc(-1 * var(--border-width));
+        height: calc(100% + 2 * var(--border-width));
+        width: var(--width);
+    }
+    #current:before {
+        left: calc(-1 * var(--width) - var(--border-width));
+        background: linear-gradient(to left, color-mix(in srgb, var(--gradient-color) var(--gradient-alpha), transparent), transparent);
+    }
+    #current:after {
+        right: calc(-1 * var(--width) - var(--border-width));
+        background: linear-gradient(to right, color-mix(in srgb, var(--gradient-color) var(--gradient-alpha), transparent), transparent);
+    }
+</style>

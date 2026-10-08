@@ -13,8 +13,9 @@
     import ModelFilter from "$lib/components/ModelFilter.svelte";
     import ModelVisuals from "$lib/components/ModelVisuals.svelte";
     import type { ModelMembership } from "$lib/bindings";
-    import Button from "$lib/components/ui/button/button.svelte";
     import { ChevronLeft, ChevronRight } from "@lucide/svelte";
+    import TooltipButton from "$lib/components/TooltipButton.svelte";
+    import * as Tooltip from "$lib/components/ui/tooltip/index.js";
 
     $effect(() => {
         backend.connect().catch(() => {});
@@ -38,9 +39,11 @@
     function onKeyDown(e: KeyboardEvent) {
       switch(e.key) {
         case "ArrowLeft":
+          e.preventDefault();
           prev();
           break;
         case "ArrowRight":
+          e.preventDefault();
           next();
           break;
       }
@@ -48,6 +51,8 @@
 </script>
 
 <ModeWatcher />
+<!-- Tooltips require a provider above every Tooltip.Root -->
+<Tooltip.Provider>
 <div id="content">
     <header class="border-b flex items-center justify-between">
         <div class="px-6">
@@ -63,9 +68,9 @@
             />
         </div>
         <div class="flex items-center gap-2 p-4">
-            <Button size="icon" variant="secondary" onclick={prev} disabled={timestep === t_start}><ChevronLeft /></Button>
+            <TooltipButton tooltip="Previous" kbd="⮜" size="icon" variant="secondary" onclick={prev} disabled={timestep === t_start}><ChevronLeft /></TooltipButton>
             <div class="bg-card h-8 w-8 rounded-md flex flex-row items-center justify-center select-none">{timestep}</div>
-            <Button size="icon" variant="secondary" onclick={next} disabled={timestep === t_end}><ChevronRight /></Button>
+            <TooltipButton tooltip="Next" kbd="➤" size="icon" variant="secondary" onclick={next} disabled={timestep === t_end}><ChevronRight /></TooltipButton>
             <ModelFilter bind:filter />
             <ConnectionIndicator />
             <ModeToggle />
@@ -97,8 +102,9 @@
         </div>
     </main>
 </div>
+</Tooltip.Provider>
 
-<svelte:window on:keydown|preventDefault={onKeyDown} />
+<svelte:window on:keydown={onKeyDown} />
 
 <style>
     #content {
