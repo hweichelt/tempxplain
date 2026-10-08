@@ -44,10 +44,10 @@
     }
     @keyframes both {
         0% {
-            background-position-x: 0%;
+            background-position-x: 100%;
         }
         100% {
-            background-position-x: 100%;
+            background-position-x: 0%;
         }
     }
     div:not(.active){
