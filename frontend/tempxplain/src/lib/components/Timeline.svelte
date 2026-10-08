@@ -15,7 +15,7 @@
     let { interval, timestep = $bindable(), filter = $bindable(), fluents }: TimelineProps = $props();
 
     let span = $derived(interval[1] + 1 - interval[0]);
-    let grid_cols_steps = $derived(`7rem repeat(${span}, 1fr) auto`);
+    let grid_cols_steps = $derived(`9rem repeat(${span}, 1fr)`);
 
     function t_class(t: number, c: string): string {
         return timestep === t ? c : "";
@@ -32,33 +32,16 @@
     }
 </script>
 
-<div class="grid grid-rows-[auto_minmax(0,1fr)] gap-4 h-full">
-    <div class="grid gap-2" style:grid-template-columns={grid_cols_steps}>
+<div class="grid grid-rows-[auto_auto_minmax(0,1fr)] h-full">
+    <div class="grid shadow-lg z-30" style:grid-template-columns={grid_cols_steps}>
         <!-- TIMELINE -->
-        <Button
-            variant="secondary"
-            size="icon"
-            class="flex flex-row justify-self-end"
-            onclick={prev}
-        >
-            <ChevronLeft />
-        </Button>
+        <div class="bg-card border-b"></div>
         {#each { length: span } as _, i (i)}
-            <Button
-                variant="secondary"
-                class={t_class(
-                    interval[0] + i,
-                    "bg-primary text-primary-foreground",
-                )}
-                onclick={() => go_to(interval[0] + i)}>{interval[0] + i}</Button
-            >
+            <div class="rounded-none bg-card border border-transparent border-b-border border-l-border text-sm h-8 flex flex-row items-center justify-center select-none">{interval[0] + i}</div>
         {/each}
-        <Button variant="secondary" size="icon" onclick={next}>
-            <ChevronRight />
-        </Button>
     </div>
     <div
-        class="grid overflow-y-scroll gap-2"
+        class="grid overflow-y-scroll"
         style:grid-template-columns={grid_cols_steps}
     >
         <!-- FLUENTS -->
@@ -67,7 +50,7 @@
             {#each { length: span } as _, t (t)}
                 <TimelineFluentIndicator fluent={fluent} membership={values[t]} active={t === timestep} model_filter={filter} />
             {/each}
-            <div class="w-8"></div>
         {/each}
     </div>
+    <div></div>
 </div>

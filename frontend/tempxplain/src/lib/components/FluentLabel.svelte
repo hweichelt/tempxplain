@@ -6,9 +6,9 @@
 </script>
 
 <div
-    class="bg-muted text-card-foreground py-0.5 px-2 rounded-md text-sm text-right"
+    class="px-2 flex flex-row items-center justify-end h-8 max-h-8 border border-transparent border-b-border select-none"
 >
-    {fluent}
+    <div class="bg-card rounded-sm h-6 px-3 flex flex-row items-center text-sm text-foreground">{fluent}</div>
 </div>
 
 <style>

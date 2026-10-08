@@ -13,6 +13,8 @@
     import ModelFilter from "$lib/components/ModelFilter.svelte";
     import ModelVisuals from "$lib/components/ModelVisuals.svelte";
     import type { ModelMembership } from "$lib/bindings";
+    import Button from "$lib/components/ui/button/button.svelte";
+    import { ChevronLeft, ChevronRight } from "@lucide/svelte";
 
     $effect(() => {
         backend.connect().catch(() => {});
@@ -20,10 +22,19 @@
     });
 
     let timeframe = $derived(program_state.explanation?.timeframe_explanation);
-    let timestep = $state(0);
+    let t_start = $derived(timeframe !== undefined ? timeframe[0] : 0);
+    let t_end = $derived(timeframe !== undefined ? timeframe[1] : 0);
+    let timestep = $derived(timeframe !== undefined ? timeframe[0] : 0);
     let fluents = $derived(program_state.explanation?.fluent_matrix);
     let visualization = $state(true);
     let filter: ModelMembership = $state("both");
+
+    function prev(){
+      timestep = Math.max(t_start, timestep - 1);
+    }
+    function next(){
+      timestep = Math.min(t_end, timestep + 1);
+    }
 </script>
 
 <ModeWatcher />
@@ -42,6 +53,9 @@
             />
         </div>
         <div class="flex items-center gap-2 p-4">
+            <Button size="icon" variant="secondary" onclick={prev} disabled={timestep === t_start}><ChevronLeft /></Button>
+            <div class="bg-card h-8 w-8 rounded-md flex flex-row items-center justify-center select-none">{timestep}</div>
+            <Button size="icon" variant="secondary" onclick={next} disabled={timestep === t_end}><ChevronRight /></Button>
             <ModelFilter bind:filter />
             <ConnectionIndicator />
             <ModeToggle />
@@ -59,7 +73,7 @@
         <div id="visualization" class="border-l">
             <ModelVisuals bind:filter bind:timestep bind:visualization />
         </div>
-        <div id="timeline" class="p-4 border-t">
+        <div id="timeline" class="border-t">
             {#if timeframe !== undefined && fluents !== undefined}
                 <Timeline
                     interval={timeframe}

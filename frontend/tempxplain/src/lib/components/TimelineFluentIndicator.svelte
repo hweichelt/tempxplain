@@ -10,11 +10,11 @@
     let { fluent, membership, model_filter = "both", active = false }: TimelineFluentIndicatorProps = $props();
 
     let classes_membership = {
-      "none": "bg-card",
+      "none": "bg-transparent",
       "ref": "bg-ref",
       "foil": "bg-foil",
       "hidden": "bg-foreground/15",
-      "both": "bg-linear-90 from-foil from-25% to-ref to-75%",
+      "both": "both",
     }
     function apply_filter(membership: ModelMembership, filter: ModelMembership): string {
       if (filter === "both") return classes_membership[membership];
@@ -31,18 +31,30 @@
     let class_active = $derived(active ? "active" : "");
 </script>
 
-<div class="h-6 w-full rounded-md {class_membership} {class_active}"></div>
+<div class="h-8 w-full max-h-8 border border-t-transparent border-r-transparent {class_membership} {class_active}"></div>
 
 <style>
+    div{
+        transition: border-color 600ms;
+    }
+    div.both{
+        background: linear-gradient(90deg, var(--color-ref) 20%, var(--color-foil) 40%, var(--color-foil) 60%, var(--color-ref) 80%);
+        background-size: 500% 100%;
+        animation: both 5s linear infinite;
+    }
+    @keyframes both {
+        0% {
+            background-position-x: 0%;
+        }
+        100% {
+            background-position-x: 100%;
+        }
+    }
     div:not(.active){
-        opacity: 0.5;
         transition-property: opacity, background-color;
         transition-duration: 100ms;
     }
     .active {
         opacity: 1;
-    }
-    div:hover{
-        border-color: var(--color-foreground);
     }
 </style>
