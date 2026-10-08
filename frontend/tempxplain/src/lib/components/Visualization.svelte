@@ -42,13 +42,13 @@
     }
 
     /* Generic styling rules for the different properties */
-    .visualization :global([class*="vb-"] :is(ellipse, polygon)) {
+    .visualization :global([class*="vb-"] :is(ellipse, polygon, path)) {
         fill: var(--b);
     }
     .visualization :global([class*="vt-"] text) {
         fill: var(--t);
     }
-    .visualization :global([class*="vs-"] :is(ellipse, polygon)) {
+    .visualization :global([class*="vs-"] :is(ellipse, polygon, path)) {
         stroke: var(--s);
     }
 

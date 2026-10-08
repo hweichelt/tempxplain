@@ -31,6 +31,6 @@ attr(node,elevator,width,"0.7"):- at(F).
 attr(node,elevator,height,"0.8"):- at(F).
 attr(node,elevator,pos,@pos(0,F)):- at(F).
 attr(node,elevator,penwidth,0):- at(F).
-attr(node,elevator,style,filled):- at(F).
+attr(node,elevator,style,"rounded,filled"):- at(F).
 attr(node,elevator,class,"vb-gray-2"):- at(F), not serve.
 attr(node,elevator,class,"vb-green"):- at(F), serve.
