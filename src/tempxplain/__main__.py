@@ -5,9 +5,6 @@ The main entry point for the application.
 import asyncio
 import sys
 from logging import Logger
-from pathlib import Path
-
-import clingo
 
 from .api import ProgramData, ServerState, rpc
 from .frontend import open_frontend, start_frontend
@@ -17,12 +14,12 @@ from .utils.parser import get_parser
 
 
 def backend_url(host: str, port: int) -> str:
-    """Construnct the backend url string."""
+    """Construct the backend url string."""
     return f"ws://{host}:{port}"
 
 
 def frontend_url(host: str, port: int) -> str:
-    """Construnct the frontend url string."""
+    """Construct the frontend url string."""
     return f"http://{host}:{port}"
 
 
@@ -32,10 +29,11 @@ def run_backend(
     log: Logger,
     query: str,
     files: list[str],
+    viz_file: str | None,
 ) -> None:
     """Start the backend in an async environment."""
     try:
-        data = ProgramData(files=files)
+        data = ProgramData(files=files, viz_file=viz_file)
         state = ServerState(data, query=query)
         asyncio.run(run_server(rpc, state, host, port))
     except KeyboardInterrupt:
@@ -70,7 +68,7 @@ def main() -> None:
     if not args.no_frontend:
         run_frontend(args.host, args.port_frontend, backend_url(args.host, args.port), log, not args.no_open)
 
-    run_backend(args.host, args.port, log, query=args.query, files=args.files)
+    run_backend(args.host, args.port, log, query=args.query, files=args.files, viz_file=args.viz)
 
 
 if __name__ == "__main__":

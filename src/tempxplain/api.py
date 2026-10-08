@@ -4,47 +4,19 @@ The backend API.
 Functions are exposed by decorating them with `@rpc.method()`. Their return value has to be JSON serializable.
 """
 
-from dataclasses import dataclass
 from typing import Literal
 
-from asplain.utils.viz import viz_graph
+from tempxplain.server import ServerState
 
-from tempxplain.explain import explanation
-
+from .bindings import Explanation, ProgramData
+from .explain import MODEL_STRING_FOIL_TYPE, MODEL_STRING_REF_TYPE, Model
 from .rpc import Registry
+from .utils.logging import get_logger
+from .visualize import visualize_domain
 
-__all__ = ["ServerState", "rpc"]
+__all__ = ["rpc"]
 
-
-@dataclass
-class Explanation:
-    """
-    Details of the logic program.
-    """
-
-    graph: str
-    partitions: dict[int, list[str]]
-    timeframe_full: tuple[int, int]
-    timeframe_explanation: tuple[int, int]
-    fluent_matrix: dict[str, list[str]]
-
-
-@dataclass
-class ProgramData:
-    files: list[str]
-
-
-@dataclass
-class ServerState:
-    """
-    State of the backend server.
-    """
-
-    program_data: ProgramData
-    query: str
-    program: str = ""
-
-
+log = get_logger("tempxplain.api")
 rpc: Registry[ServerState] = Registry()
 
 
@@ -67,6 +39,14 @@ def get_program(state: ServerState) -> str:
 
 
 @rpc.method()
+def get_visualization(state: ServerState, model: MODEL_STRING_REF_TYPE | MODEL_STRING_FOIL_TYPE, t: int) -> str | None:
+    """Get the domain visualization of the specified model at time `t` as a base64 svg."""
+    if state.program_data.viz_file is None:
+        return None
+    return visualize_domain(state, model, t)
+
+
+@rpc.method()
 def get_program_data(state: ServerState) -> ProgramData:
     """Get data for the input programs."""
     return state.program_data
@@ -75,21 +55,7 @@ def get_program_data(state: ServerState) -> ProgramData:
 @rpc.method()
 def get_explanation(state: ServerState) -> Explanation:
     """Get details of the logic program."""
-    exp = explanation(
-        files=state.program_data.files,
-        constants={},
-        assumptions=set(),
-        model_program="",
-        query=state.query,
-    )
-    print(f"MATRIX: {exp.fluent_matrix}")
-    with open("out/graph.lp", "w") as f:
-        f.write(exp.graph)
-        viz_graph(
-            pg=exp.graph,
-            title="Explanation Graph",
-            name="contrastive_pg",
-        )
+    exp = state.explanation
     return Explanation(
         graph=exp.graph,
         partitions={t: [str(a.symbol) for a in atoms] for t, atoms in exp.partitions.items()},

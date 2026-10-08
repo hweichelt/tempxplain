@@ -19,8 +19,6 @@ from tempxplain.utils.logging import get_logger
 
 from .utils.io import read_file
 
-__all__ = ["explanation_graph"]
-
 log = get_logger("server.explain")
 
 # Enable python for the clingo encodings in asplain using it
@@ -32,31 +30,41 @@ QUERY_NEGATION_PREFIX = "-"
 
 
 MODEL_STRING_REF_TYPE = Literal["ref"]
-MODEL_STRING_REF = get_args(MODEL_STRING_REF_TYPE)[0]
+MODEL_STRING_REF: Literal["ref"] = get_args(MODEL_STRING_REF_TYPE)[0]
 MODEL_STRING_FOIL_TYPE = Literal["foil"]
-MODEL_STRING_FOIL = get_args(MODEL_STRING_FOIL_TYPE)[0]
+MODEL_STRING_FOIL: Literal["foil"] = get_args(MODEL_STRING_FOIL_TYPE)[0]
 
 
 class Model(Enum):
+    """A model in the explanation graph."""
+
     REFERENCE = MODEL_STRING_REF
     FOIL = MODEL_STRING_FOIL
 
 
 class ModelMembership(Enum):
+    """The models an atom belongs to; the values of `Model` are a subset of the values here."""
+
     NONE = "none"
-    REFERENCE = "ref"
-    FOIL = "foil"
+    REFERENCE = MODEL_STRING_REF
+    FOIL = MODEL_STRING_FOIL
     BOTH = "both"
+
+    @classmethod
+    def from_model(cls, model: Model) -> "ModelMembership":
+        return cls(model.value)
+
+    def has(self, model: Model) -> bool:
+        """Check whether the membership includes the given model."""
+        return self in (ModelMembership.BOTH, ModelMembership.from_model(model))
 
     @classmethod
     def from_set(cls, models: set[Model]) -> "ModelMembership":
         match list(models):
             case []:
                 return cls.NONE
-            case [Model.REFERENCE]:
-                return cls.REFERENCE
-            case [Model.FOIL]:
-                return cls.FOIL
+            case [model]:
+                return cls.from_model(model)
             case _:
                 return cls.BOTH
 
@@ -98,13 +106,14 @@ class Atom:
 @dataclass(frozen=True)
 class Explanation:
     symbols: set[Symbol]
+    symbols_transformed: set[Symbol]
 
     @cached_property
     def graph(self) -> str:
-        return "\n".join(f"{str(s)}." for s in self.symbols)
+        return "\n".join(f"{str(s)}." for s in self.symbols_transformed)
 
     @cached_property
-    def atoms_explanation(self) -> set[Atom]:
+    def atoms(self) -> set[Atom]:
         # collect symbols indicating model associations
         models: dict[Symbol, set[Model]] = {}
         for symbol in self.symbols:
@@ -122,9 +131,27 @@ class Explanation:
         return atoms
 
     @cached_property
+    def atoms_explanation(self) -> set[Atom]:
+        # collect symbols indicating model associations
+        models: dict[Symbol, set[Model]] = {}
+        for symbol in self.symbols_transformed:
+            if symbol.match("model", 2):
+                atom = symbol.arguments[0]
+                model = Model(str(symbol.arguments[1]))
+                models.setdefault(atom, set()).add(model)
+        # collect node atoms, then associate them with their models
+        atoms = set()
+        for symbol in self.symbols_transformed:
+            if symbol.match("node", 2) and str(symbol.arguments[1]) == "atom":
+                atom = symbol.arguments[0]
+                atom_models = models.get(atom, set())
+                atoms.add(Atom(atom, atom_models))
+        return atoms
+
+    @cached_property
     def atoms_static(self) -> set[Atom]:
         static: set[Atom] = set()
-        for atom in self.atoms_explanation:
+        for atom in self.atoms:
             if atom.time is None:
                 static.add(atom)
         return static
@@ -169,6 +196,16 @@ class Explanation:
             assert atom.time is not None  # make sure time is not None
             matrix[atom.base][atom.time] = atom.membership
         return matrix
+
+    def get_model_state_at(self, model: Model, t: int) -> set[Symbol]:
+        """Get the state of the domain world at given time `t` in the model `model`."""
+        if t not in range(self.interval[0], self.interval[1] + 1):
+            raise ValueError(f"Time {t} is out of range for the explanation interval {self.interval}")
+        atoms_model_partition_t = {a.base for a in self.partitions[t] if a.membership.has(model)}
+        atoms_static = {a.base for a in self.atoms_static}
+        atoms_t = atoms_model_partition_t.union(atoms_static)
+        log.info(f"Model state at t={t}: {[str(a) for a in atoms_t]}")
+        return atoms_t
 
 
 def parse_query_program(query: str) -> str:
@@ -257,7 +294,7 @@ def explanation(
                         log.debug(f"Skipping non-optimal foil model {foil_model.number}")
                         continue
                     explanation_symbols = transform_temporal(list(foil_model.symbols(shown=True)))
-                    return Explanation(set(explanation_symbols))
+                    return Explanation(set(foil_model.symbols(shown=True)), set(explanation_symbols))
                 log.warning("No foil found.")
 
         if not model_found:
@@ -276,6 +313,6 @@ def explanation(
                         log.info(f"Skipping non-optimal foil model {foil_model.number}")
                         continue
                     explanation_symbols = transform_temporal(list(foil_model.symbols(shown=True)))
-                    return Explanation(set(explanation_symbols))
+                    return Explanation(set(foil_model.symbols(shown=True)), set(explanation_symbols))
                 log.warning("No foil found.")
     raise RuntimeError("No explanation graph found.")

@@ -60,6 +60,7 @@ def get_parser() -> ArgumentParser:
     parser.add_argument(
         "-q", "--query", required=True, help="the query that should be satisfied in the foil model. (negation with '-')"
     )
+    parser.add_argument("--viz", help="visualization encoding for a domain timestep")
 
     parser.add_argument("--host", default=DEFAULT_HOST, help="address the server listens on [%(default)s]")
     parser.add_argument("--port", default=DEFAULT_PORT, type=int, help="port the server listens on [%(default)s]")
