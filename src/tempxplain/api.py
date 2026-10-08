@@ -58,8 +58,10 @@ def get_explanation(state: ServerState) -> Explanation:
     exp = state.explanation
     return Explanation(
         graph=exp.graph,
-        partitions={t: [str(a.symbol) for a in atoms] for t, atoms in exp.partitions.items()},
-        timeframe_full=exp.interval,
-        timeframe_explanation=exp.interval,
-        fluent_matrix={str(f): [m.value for m in membership] for f, membership in exp.fluent_matrix.items()},
+        partitions={t: [str(a.symbol) for a in atoms] for t, atoms in exp.partitions_transformed.items()},
+        timeframe_full=exp.interval_transformed,
+        timeframe_explanation=exp.interval_transformed,
+        fluent_matrix={
+            str(f): [m.value for m in membership] for f, membership in exp.fluent_matrix_transformed.items()
+        },
     )

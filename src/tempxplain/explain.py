@@ -1,5 +1,6 @@
 """Functionality for generating the explanations with asplain."""
 
+import stat
 from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import Enum
@@ -16,6 +17,7 @@ from clingo.script import enable_python
 
 from tempxplain.temporal import AtomType, atom_base, atom_time, atom_type, is_action, is_fluent
 from tempxplain.utils.logging import get_logger
+from tempxplain.utils.symbols import to_program
 
 from .utils.io import read_file
 
@@ -103,106 +105,102 @@ class Atom:
 
 @dataclass(frozen=True)
 class Explanation:
+    """Representation of an explanation graph."""
+
     symbols: set[Symbol]
 
     @cached_property
     def symbols_transformed(self) -> set[Symbol]:
+        """The symbols of the explanation graph after temporal transformation."""
         return set(transform_temporal(self.symbols))
 
     @cached_property
     def graph(self) -> str:
-        return "\n".join(f"{str(s)}." for s in self.symbols_transformed)
+        """The explanation graph as a program string."""
+        return to_program(self.symbols_transformed)
 
     @cached_property
     def atoms(self) -> set[Atom]:
-        # collect symbols indicating model associations
-        models: dict[Symbol, set[Model]] = {}
-        for symbol in self.symbols:
-            if symbol.match("model", 2):
-                atom = symbol.arguments[0]
-                model = Model(str(symbol.arguments[1]))
-                models.setdefault(atom, set()).add(model)
-        # collect node atoms, then associate them with their models
-        atoms = set()
-        for symbol in self.symbols:
-            if symbol.match("node", 2) and str(symbol.arguments[1]) == "atom":
-                atom = symbol.arguments[0]
-                atom_models = models.get(atom, set())
-                atoms.add(Atom(atom, atom_models))
-        return atoms
+        """The atoms of the untransformed explanation graph with assigned model memberships."""
+        return Explanation._explanation_symbols_to_atoms(self.symbols)
 
     @cached_property
-    def atoms_explanation(self) -> set[Atom]:
-        # collect symbols indicating model associations
-        models: dict[Symbol, set[Model]] = {}
-        for symbol in self.symbols_transformed:
-            if symbol.match("model", 2):
-                atom = symbol.arguments[0]
-                model = Model(str(symbol.arguments[1]))
-                models.setdefault(atom, set()).add(model)
-        # collect node atoms, then associate them with their models
-        atoms = set()
-        for symbol in self.symbols_transformed:
-            if symbol.match("node", 2) and str(symbol.arguments[1]) == "atom":
-                atom = symbol.arguments[0]
-                atom_models = models.get(atom, set())
-                atoms.add(Atom(atom, atom_models))
-        return atoms
+    def atoms_transformed(self) -> set[Atom]:
+        """The atoms of the transformed explanation graph with assigned model memberships."""
+        return Explanation._explanation_symbols_to_atoms(self.symbols_transformed)
 
     @cached_property
     def atoms_static(self) -> set[Atom]:
-        static: set[Atom] = set()
-        for atom in self.atoms:
-            if atom.time is None:
-                static.add(atom)
-        return static
+        """The static atoms of the untransformed explanation graph."""
+        return {a for a in self.atoms if a.time is None}
 
     @cached_property
-    def atoms_timed(self) -> set[Atom]:
-        timed: set[Atom] = set()
-        for atom in self.atoms_explanation:
-            if atom.time is not None:
-                timed.add(atom)
-        return timed
+    def atoms_transformed_timed(self) -> set[Atom]:
+        """The timed atoms of the transformed explanation graph."""
+        return {a for a in self.atoms_transformed if a.time is not None}
 
     @cached_property
-    def fluents(self) -> set[Atom]:
-        return {a for a in self.atoms_timed if a.is_fluent}
+    def fluents_transformed(self) -> set[Atom]:
+        """The fluent atoms of the transformed explanation graph."""
+        return {a for a in self.atoms_transformed_timed if a.is_fluent}
 
     @cached_property
-    def actions(self) -> set[Atom]:
-        return {a for a in self.atoms_timed if a.is_action}
+    def actions_transformed(self) -> set[Atom]:
+        """The action atoms of the transformed explanation graph."""
+        return {a for a in self.atoms_transformed_timed if a.is_action}
 
     @cached_property
-    def partitions(self) -> dict[int, set[Atom]]:
+    def partitions_transformed(self) -> dict[int, set[Atom]]:
+        """The partitions of the transformed explanation graph, indexed by timepoint."""
         partitions: dict[int, set[Atom]] = {}
-        for atom in self.atoms_timed:
+        for atom in self.atoms_transformed_timed:
             if (timepoint := atom.time) is not None:
                 partitions.setdefault(timepoint, set()).add(atom)
         return partitions
 
     @cached_property
-    def interval(self) -> tuple[int, int]:
-        return min(self.partitions), max(self.partitions)
+    def interval_transformed(self) -> tuple[int, int]:
+        """The time interval of the transformed explanation graph as a tuple (start, end)."""
+        return min(self.partitions_transformed), max(self.partitions_transformed)
 
     @cached_property
-    def length(self) -> int:
-        return self.interval[1] - self.interval[0] + 1
+    def length_transformed(self) -> int:
+        """The length of the transformed explanation graph (the number of timepoints)."""
+        return self.interval_transformed[1] - self.interval_transformed[0] + 1
 
     @cached_property
-    def fluent_matrix(self) -> dict[Symbol, list[ModelMembership]]:
-        fluent_bases = {a.base for a in self.fluents}
-        matrix = {a: [ModelMembership.NONE] * self.length for a in fluent_bases}
-        for atom in self.fluents:
+    def fluent_matrix_transformed(self) -> dict[Symbol, list[ModelMembership]]:
+        """`Symbol` <-> `ModelMembership` matrix for fluents in the transformed explanation graph."""
+        fluent_bases = {a.base for a in self.fluents_transformed}
+        matrix = {a: [ModelMembership.NONE] * self.length_transformed for a in fluent_bases}
+        for atom in self.fluents_transformed:
             assert atom.time is not None  # make sure time is not None
             matrix[atom.base][atom.time] = atom.membership
         return matrix
 
+    @staticmethod
+    def _explanation_symbols_to_atoms(symbols: set[Symbol]) -> set[Atom]:
+        # collect symbols indicating model associations
+        models: dict[Symbol, set[Model]] = {}
+        for symbol in symbols:
+            if symbol.match("model", 2):
+                atom = symbol.arguments[0]
+                model = Model(str(symbol.arguments[1]))
+                models.setdefault(atom, set()).add(model)
+        # collect node atoms, then associate them with their models
+        atoms = set()
+        for symbol in symbols:
+            if symbol.match("node", 2) and str(symbol.arguments[1]) == "atom":
+                atom = symbol.arguments[0]
+                atom_models = models.get(atom, set())
+                atoms.add(Atom(atom, atom_models))
+        return atoms
+
     def get_model_state_at(self, model: Model, t: int) -> set[Symbol]:
         """Get the state of the domain world at given time `t` in the model `model`."""
-        if t not in range(self.interval[0], self.interval[1] + 1):
-            raise ValueError(f"Time {t} is out of range for the explanation interval {self.interval}")
-        atoms_model_partition_t = {a.base for a in self.partitions[t] if a.membership.has(model)}
+        if t not in range(self.interval_transformed[0], self.interval_transformed[1] + 1):
+            raise ValueError(f"Time {t} is out of range for the explanation interval {self.interval_transformed}")
+        atoms_model_partition_t = {a.base for a in self.partitions_transformed[t] if a.membership.has(model)}
         atoms_static = {a.base for a in self.atoms_static}
         atoms_t = atoms_model_partition_t.union(atoms_static)
         log.info(f"Model state at t={t}: {[str(a) for a in atoms_t]}")
