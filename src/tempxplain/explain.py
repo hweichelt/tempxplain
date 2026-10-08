@@ -1,6 +1,5 @@
 """Functionality for generating the explanations with asplain."""
 
-import stat
 from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import Enum
