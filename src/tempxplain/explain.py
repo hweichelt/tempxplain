@@ -71,31 +71,43 @@ class ModelMembership(Enum):
 
 @dataclass(frozen=True)
 class Atom:
+    """An atom in the explanation graph."""
+
     symbol: Symbol
     models: set[Model]
 
     @cached_property
     def type(self) -> AtomType:
+        """The temporal type of the atom."""
         return atom_type(self.symbol)
 
     @cached_property
     def time(self) -> int | None:
+        """The timestep of the atom, if it is timed."""
         return atom_time(self.symbol)
 
     @cached_property
     def base(self) -> Symbol:
+        """
+        The base atom of the atom, if it is timed.
+
+        If it is static the atom itself is returned.
+        """
         return atom_base(self.symbol)
 
     @cached_property
     def membership(self) -> ModelMembership:
+        """The model membership of the atom."""
         return ModelMembership.from_set(self.models)
 
     @cached_property
     def is_fluent(self) -> bool:
+        """Is the atom a fluent."""
         return is_fluent(self.symbol)
 
     @cached_property
     def is_action(self) -> bool:
+        """Is the atom an action."""
         return is_action(self.symbol)
 
     def __hash__(self) -> int:
