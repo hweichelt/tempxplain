@@ -55,7 +55,7 @@
             {/each}
         {/each}
         <div class="absolute top-0 bottom-0 left-[9rem] right-0 overflow-hidden">
-            <div id="current" class="absolute border-2 border-foreground border-t-transparent border-b-transparent" style:--step-size={`${timestep_width}px`} style:--step={timestep}>            </div>
+            <div id="current" class="absolute border-2 border-white border-t-transparent border-b-transparent" style:--step-size={`${timestep_width}px`} style:--step={timestep}>            </div>
         </div>
     </div>
     <div></div>
@@ -65,10 +65,10 @@
     #current {
         --border-width: 2px;
 
-        width: var(--step-size);
+        width: calc(var(--step-size) + 2 * 0.05rem);
         height: calc(100% + 2 * var(--border-width));
         top: calc(-1 * var(--border-width));
-        left: calc(0.1rem + var(--step) * (var(--step-size) + 0.01rem));
+        left: calc(var(--step) * (var(--step-size) + 0.01rem));
         transition: left 100ms;
         z-index: 10;
     }
