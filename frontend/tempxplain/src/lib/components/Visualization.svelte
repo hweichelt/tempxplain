@@ -12,7 +12,7 @@
     let { model, timestep, visualization = false }: VisualizationProps = $props();
 </script>
 
-<div class="bg-card w-full h-full rounded-md flex flex-row items-center justify-center p-4">
+<div class="bg-card/70 w-full h-full rounded-md flex flex-row items-center justify-center p-4 backdrop-blur-3xl">
   {#if visualization}
       {#await visualization_state.get(model, timestep)}
           <Skeleton class="w-full h-full" />
