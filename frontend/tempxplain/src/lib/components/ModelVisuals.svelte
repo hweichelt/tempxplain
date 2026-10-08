@@ -37,6 +37,10 @@
         --transition: 350ms;
         --height-hidden: 0px;
     }
+    .model{
+        min-height: 0;
+        transition: padding var(--transition);
+    }
     .grad{
         transition: opacity var(--transition);
     }
@@ -47,6 +51,11 @@
     .models.filter-ref {
         grid-template-rows: calc(100% - var(--height-hidden)) var(--height-hidden);
     }
+    .models.filter-ref .model.foil {
+        padding-top: 0;
+        padding-bottom: 0;
+        border-top-width: 0;
+    }
     .models.filter-ref .model.foil .grad{
         opacity: 0;
     }
@@ -55,6 +64,10 @@
     }
     .models.filter-foil {
         grid-template-rows: var(--height-hidden) calc(100% - var(--height-hidden));
+    }
+    .models.filter-foil .model.ref {
+        padding-top: 0;
+        padding-bottom: 0;
     }
     .models.filter-foil .model.ref .grad{
         opacity: 0;
