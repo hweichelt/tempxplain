@@ -35,6 +35,16 @@
     function next(){
       timestep = Math.min(t_end, timestep + 1);
     }
+    function onKeyDown(e: KeyboardEvent) {
+      switch(e.key) {
+        case "ArrowLeft":
+          prev();
+          break;
+        case "ArrowRight":
+          next();
+          break;
+      }
+    }
 </script>
 
 <ModeWatcher />
@@ -87,6 +97,8 @@
         </div>
     </main>
 </div>
+
+<svelte:window on:keydown|preventDefault={onKeyDown} />
 
 <style>
     #content {
