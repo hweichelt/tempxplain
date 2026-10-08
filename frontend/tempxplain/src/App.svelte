@@ -7,15 +7,9 @@
     import Badge from "$lib/components/ui/badge/badge.svelte";
     import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
     import Timeline from "$lib/components/Timeline.svelte";
-    import logo_dark from "./assets/logo.svg";
-    import logo_light from "./assets/logo_light.svg";
     import text_dark from "./assets/tempxplain_text.svg";
     import text_light from "./assets/tempxplain_text_light.svg";
-    import grad_dark from "./assets/gradient_color.png";
-    import grad_light from "./assets/gradient_light.png";
-    import Button from "$lib/components/ui/button/button.svelte";
     import { program_state } from "$lib/state/program_state.svelte";
-    import Visualization from "$lib/components/Visualization.svelte";
     import ModelFilter from "$lib/components/ModelFilter.svelte";
     import ModelVisuals from "$lib/components/ModelVisuals.svelte";
     import type { ModelMembership } from "$lib/bindings";
@@ -35,32 +29,18 @@
 <ModeWatcher />
 <div id="content">
     <header class="border-b flex items-center justify-between">
-        <div class="h-full flex flex-row">
-            <div class="logo-bg h-full flex flex-row items-center pl-6 pr-6">
-                <img
-                    src={logo_dark}
-                    alt="logo"
-                    class="size-8 dark:invert not-dark:hidden"
-                />
-                <img
-                    src={logo_light}
-                    alt="logo"
-                    class="size-8 dark:invert dark:hidden"
-                />
-            </div>
-            <img src={grad_dark} alt="" class="h-16 not-dark:hidden" />
-            <img src={grad_light} alt="" class="h-16 dark:hidden" />
+        <div class="px-6">
+            <img
+                src={text_dark}
+                alt="TempXplain"
+                class="h-6 dark:invert not-dark:hidden"
+            />
+            <img
+                src={text_light}
+                alt="TempXplain"
+                class="h-6 dark:invert dark:hidden"
+            />
         </div>
-        <img
-            src={text_dark}
-            alt="TempXplain"
-            class="h-6 dark:invert not-dark:hidden"
-        />
-        <img
-            src={text_light}
-            alt="TempXplain"
-            class="h-6 dark:invert dark:hidden"
-        />
         <div class="flex items-center gap-2 p-4">
             <ModelFilter bind:filter />
             <ConnectionIndicator />
