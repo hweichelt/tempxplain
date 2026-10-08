@@ -5,19 +5,17 @@
     import FluentLabel from "./FluentLabel.svelte";
     import TimelineFluentIndicator from "./TimelineFluentIndicator.svelte";
     import type { ModelMembership } from "$lib/bindings";
-    import * as ToggleGroup from "$lib/components/ui/toggle-group/index.js";
 
     interface TimelineProps {
         interval: [number, number];
         timestep: number;
+        filter: ModelMembership;
         fluents: Record<string, ModelMembership[]>;
     }
-    let { interval, timestep = $bindable(), fluents }: TimelineProps = $props();
+    let { interval, timestep = $bindable(), filter = $bindable(), fluents }: TimelineProps = $props();
 
     let span = $derived(interval[1] + 1 - interval[0]);
     let grid_cols_steps = $derived(`7rem repeat(${span}, 1fr) auto`);
-
-    let model_filter: ModelMembership = $state("both");
 
     function t_class(t: number, c: string): string {
         return timestep === t ? c : "";
@@ -31,14 +29,6 @@
     }
     function go_to(t: number): void {
         timestep = Math.max(Math.min(t, interval[1]), interval[0]);
-    }
-    function set_view_model(model: ModelMembership): void {
-      if(model !== "none" && model !== "both"){
-        model_filter = model;
-      }
-    }
-    function reset_view_model(): void {
-      model_filter = "both";
     }
 </script>
 
@@ -75,13 +65,7 @@
         {#each Object.entries(fluents).sort() as [fluent, values]}
             <FluentLabel {fluent} />
             {#each { length: span } as _, t (t)}
-                <div
-                    role="presentation"
-                    onmouseenter={() => set_view_model(values[t])}
-                    onmouseleave={reset_view_model}
-                >
-                    <TimelineFluentIndicator fluent={fluent} membership={values[t]} active={t === timestep} model_filter={model_filter} />
-                </div>
+                <TimelineFluentIndicator fluent={fluent} membership={values[t]} active={t === timestep} model_filter={filter} />
             {/each}
             <div class="w-8"></div>
         {/each}

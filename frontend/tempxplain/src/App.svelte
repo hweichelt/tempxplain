@@ -16,6 +16,9 @@
     import Button from "$lib/components/ui/button/button.svelte";
     import { program_state } from "$lib/state/program_state.svelte";
     import Visualization from "$lib/components/Visualization.svelte";
+    import ModelFilter from "$lib/components/ModelFilter.svelte";
+    import ModelVisuals from "$lib/components/ModelVisuals.svelte";
+    import type { ModelMembership } from "$lib/bindings";
 
     $effect(() => {
         backend.connect().catch(() => {});
@@ -26,6 +29,7 @@
     let timestep = $state(0);
     let fluents = $derived(program_state.explanation?.fluent_matrix);
     let visualization = $state(true);
+    let filter: ModelMembership = $state("both");
 </script>
 
 <ModeWatcher />
@@ -58,6 +62,7 @@
             class="h-6 dark:invert dark:hidden"
         />
         <div class="flex items-center gap-2 p-4">
+            <ModelFilter bind:filter />
             <ConnectionIndicator />
             <ModeToggle />
         </div>
@@ -71,27 +76,15 @@
                 <Skeleton class="w-full h-full" />
             </div>
         </div>
-        <div id="visualization" class="border-l grid grid-rows-2">
-            <div class="relative p-4 grid grid-rows-[auto_minmax(0,1fr)] gap-4 bg-linear-180 from-ref/35 to-transparent overflow-hidden">
-                <Badge variant="secondary">REFERENCE</Badge>
-                <div class="z-50">
-                    <Visualization model="ref" timestep={timestep} {visualization}/>
-                </div>
-                <div class="absolute bottom-0 left-[50%] translate-x-[-50%] translate-y-[50%] aspect-square w-full z-10 rounded-full bg-radial from-background to-70% to-transparent"></div>
-            </div>
-            <div class="border-t relative p-4 grid grid-rows-[auto_minmax(0,1fr)] gap-4 bg-linear-180 from-foil/35 to-transparent overflow-hidden">
-                <Badge variant="secondary">FOIL</Badge>
-                <div class="z-50">
-                    <Visualization model="foil" timestep={timestep} {visualization} />
-                </div>
-                <div class="absolute bottom-0 left-[50%] translate-x-[-50%] translate-y-[50%] aspect-square w-full z-10 rounded-full bg-radial from-background to-70% to-transparent"></div>
-            </div>
+        <div id="visualization" class="border-l">
+            <ModelVisuals bind:filter bind:timestep bind:visualization />
         </div>
         <div id="timeline" class="p-4 border-t">
             {#if timeframe !== undefined && fluents !== undefined}
                 <Timeline
                     interval={timeframe}
                     bind:timestep={timestep}
+                    bind:filter
                     fluents={fluents}
                 />
             {:else}
