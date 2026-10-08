@@ -68,9 +68,9 @@
             />
         </div>
         <div class="flex items-center gap-2 p-4">
-            <TooltipButton tooltip="Previous" kbd="⮜" size="icon" variant="secondary" onclick={prev} disabled={timestep === t_start}><ChevronLeft /></TooltipButton>
-            <div class="bg-card h-8 w-8 rounded-md flex flex-row items-center justify-center select-none">{timestep}</div>
-            <TooltipButton tooltip="Next" kbd="➤" size="icon" variant="secondary" onclick={next} disabled={timestep === t_end}><ChevronRight /></TooltipButton>
+            <TooltipButton tooltip="Previous" kbd="◄" size="icon" variant="secondary" onclick={prev} disabled={timestep === t_start}><ChevronLeft /></TooltipButton>
+            <div class="bg-card h-8 w-8 rounded-md flex flex-row items-center justify-center select-none border">{timestep}</div>
+            <TooltipButton tooltip="Next" kbd="►" size="icon" variant="secondary" onclick={next} disabled={timestep === t_end}><ChevronRight /></TooltipButton>
             <ModelFilter bind:filter />
             <ConnectionIndicator />
             <ModeToggle />
