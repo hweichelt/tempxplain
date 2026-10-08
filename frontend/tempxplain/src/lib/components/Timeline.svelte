@@ -9,28 +9,28 @@
 
     interface TimelineProps {
         interval: [number, number];
+        timestep: number;
         fluents: Record<string, ModelMembership[]>;
     }
-    let { interval, fluents }: TimelineProps = $props();
+    let { interval, timestep = $bindable(), fluents }: TimelineProps = $props();
 
     let span = $derived(interval[1] + 1 - interval[0]);
     let grid_cols_steps = $derived(`7rem repeat(${span}, 1fr) auto`);
 
-    let timestep_current: number = $state(interval[0]);
     let model_filter: ModelMembership = $state("both");
 
     function t_class(t: number, c: string): string {
-        return timestep_current === t ? c : "";
+        return timestep === t ? c : "";
     }
 
     function next(): void {
-        timestep_current = Math.min(timestep_current + 1, interval[1]);
+        timestep = Math.min(timestep + 1, interval[1]);
     }
     function prev(): void {
-        timestep_current = Math.max(timestep_current - 1, interval[0]);
+        timestep = Math.max(timestep - 1, interval[0]);
     }
     function go_to(t: number): void {
-        timestep_current = Math.max(Math.min(t, interval[1]), interval[0]);
+        timestep = Math.max(Math.min(t, interval[1]), interval[0]);
     }
     function set_view_model(model: ModelMembership): void {
       if(model !== "none" && model !== "both"){
@@ -80,7 +80,7 @@
                     onmouseenter={() => set_view_model(values[t])}
                     onmouseleave={reset_view_model}
                 >
-                    <TimelineFluentIndicator fluent={fluent} membership={values[t]} active={t === timestep_current} model_filter={model_filter} />
+                    <TimelineFluentIndicator fluent={fluent} membership={values[t]} active={t === timestep} model_filter={model_filter} />
                 </div>
             {/each}
             <div class="w-8"></div>

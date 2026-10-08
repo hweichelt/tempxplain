@@ -15,6 +15,7 @@
     import grad_light from "./assets/gradient_light.png";
     import Button from "$lib/components/ui/button/button.svelte";
     import { program_state } from "$lib/state/program_state.svelte";
+    import Visualization from "$lib/components/Visualization.svelte";
 
     $effect(() => {
         backend.connect().catch(() => {});
@@ -22,7 +23,9 @@
     });
 
     let timeframe = $derived(program_state.explanation?.timeframe_explanation);
+    let timestep = $state(0);
     let fluents = $derived(program_state.explanation?.fluent_matrix);
+    let visualization = $state(true);
 </script>
 
 <ModeWatcher />
@@ -68,7 +71,7 @@
         </div>
     </header>
     <main>
-        <div id="graph" class="p-4 grid grid-rows-[auto_1fr] gap-4">
+        <div id="graph" class="p-4 grid grid-rows-[auto_minmax(0,1fr)] gap-4">
             <div class="flex flex-row gap-2 items-center">
                 <Badge variant="secondary">EXPLANATION</Badge>
             </div>
@@ -77,16 +80,16 @@
             </div>
         </div>
         <div id="visualization" class="border-l grid grid-rows-2">
-            <div class="p-4 grid grid-rows-[auto_1fr] gap-4">
+            <div class="p-4 grid grid-rows-[auto_minmax(0,1fr)] gap-4">
                 <Badge variant="secondary">REFERENCE</Badge>
                 <div>
-                    <Skeleton class="w-full h-full" />
+                    <Visualization model="ref" timestep={timestep} {visualization}/>
                 </div>
             </div>
-            <div class="border-t p-4 grid grid-rows-[auto_1fr] gap-4">
+            <div class="border-t p-4 grid grid-rows-[auto_minmax(0,1fr)] gap-4">
                 <Badge variant="secondary">FOIL</Badge>
                 <div>
-                    <Skeleton class="w-full h-full" />
+                    <Visualization model="foil" timestep={timestep} {visualization} />
                 </div>
             </div>
         </div>
@@ -94,6 +97,7 @@
             {#if timeframe !== undefined && fluents !== undefined}
                 <Timeline
                     interval={timeframe}
+                    bind:timestep={timestep}
                     fluents={fluents}
                 />
             {:else}

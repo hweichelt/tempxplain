@@ -4,6 +4,10 @@ export interface Api {
   get_program: { params: Record<string, never>; result: string };
   get_program_data: { params: Record<string, never>; result: ProgramData };
   get_explanation: { params: Record<string, never>; result: Explanation };
+  get_visualization: {
+    params: { model: Model; t: number };
+    result: string | null;
+  };
 }
 
 export type Model = "ref" | "foil";
