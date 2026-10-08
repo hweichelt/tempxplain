@@ -1,3 +1,5 @@
+"""Utility functions for working with clingo symbols."""
+
 from collections.abc import Iterable
 
 from clingo import Symbol

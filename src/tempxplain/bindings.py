@@ -1,3 +1,5 @@
+"""Binding dataclasses for the API."""
+
 from dataclasses import dataclass
 
 
