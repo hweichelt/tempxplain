@@ -36,8 +36,7 @@ def atom_time(atom: Symbol) -> int | None:
     """Extract the time from a timed atom."""
     match atom_type(atom):
         case AtomType.TIMED:
-            timepoint = atom.arguments[1].number
-            return timepoint
+            return atom.arguments[1].number
         case AtomType.STATIC:
             return None
 
