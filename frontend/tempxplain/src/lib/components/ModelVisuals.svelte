@@ -12,7 +12,9 @@ import Visualization from "./Visualization.svelte";
 
 <div class="models h-full filter-{filter}">
     <div class="model ref relative p-4 grid grid-rows-[auto_minmax(0,1fr)] gap-2 overflow-hidden">
-        <PanelLabel>REFERENCE</PanelLabel>
+        <div class="header z-50 flex flex-row justify-start">
+            <PanelLabel>REFERENCE</PanelLabel>
+        </div>
         <div class="viz z-50">
             <Visualization model="ref" timestep={timestep} {visualization}/>
         </div>
@@ -20,7 +22,9 @@ import Visualization from "./Visualization.svelte";
         <div class="grad absolute bottom-0 left-[50%] translate-x-[-50%] translate-y-[50%] aspect-square w-full z-10 rounded-full bg-radial from-background to-70% to-transparent"></div>
     </div>
     <div class="border-t model foil relative p-4 grid grid-rows-[auto_minmax(0,1fr)] gap-2 overflow-hidden">
-        <PanelLabel>FOIL</PanelLabel>
+        <div class="header z-50 flex flex-row justify-start">
+            <PanelLabel>FOIL</PanelLabel>
+        </div>
         <div class="viz z-50">
             <Visualization model="foil" timestep={timestep} {visualization} />
         </div>
@@ -46,6 +50,7 @@ import Visualization from "./Visualization.svelte";
         transition: opacity var(--transition);
     }
     .viz,
+    .header,
     .label{
         transition: opacity calc(var(--transition) / 1.5);
     }

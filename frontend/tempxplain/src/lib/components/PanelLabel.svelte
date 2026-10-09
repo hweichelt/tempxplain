@@ -13,7 +13,7 @@
     }
 </script>
 
-<div class="label text-sm px-4 py-1 rounded-md justify-self-start font-semibold text-foreground/75 backdrop-blur-lg z-50 {variant_classes[variant]}">
+<div class="label text-sm px-4 py-1 rounded-md justify-self-start font-semibold text-foreground/75 backdrop-blur-lg {variant_classes[variant]}">
     {@render children()}
 </div>
 
