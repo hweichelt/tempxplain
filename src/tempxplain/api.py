@@ -43,6 +43,12 @@ def get_visualization(state: ServerState, model: MODEL_STRING_REF_TYPE | MODEL_S
     """Get the domain visualization of the specified model at time `t` as svg."""
     if state.program_data.viz_file is None:
         return None
+    t_start = state.explanation.interval_transformed[0]
+    t_end = state.explanation.interval_transformed[1]
+    log.info(f"{t}, [{t_start},{t_end}]")
+    if not (t_start <= t <= t_end):
+        log.warning(f"Cannot generate visualization at t={t} since it is out of bounds [{t_start},{t_end}]")
+        return None
     return visualize_domain(state, Model(model), t)
 
 
