@@ -11,24 +11,24 @@
         polling_ms?: number;
         counter: number;
         active: boolean;
+        running: boolean;
     }
-    let { t_start, t_end, step_seconds = 2, polling_ms = 100, timestep = $bindable(), counter = $bindable(), active = $bindable() }: PlayButtonProps = $props();
+    let { t_start, t_end, step_seconds = 2, polling_ms = 100, timestep = $bindable(), counter = $bindable(), active = $bindable(), running = $bindable() }: PlayButtonProps = $props();
 
-    let playing = $state(false);
-    let tooltip = $derived(playing? "Pause Playing" : timestep === t_end ? "Restart the Timeline": "Play the Timeline");
+    let tooltip = $derived(running? "Pause Playing" : timestep === t_end ? "Restart the Timeline": "Play the Timeline");
 
     let counter_ms = $derived(step_seconds * 1000);
 
    	onMount(() => {
 		const interval = setInterval(() => {
-		   if (playing) {
+		   if (running) {
 				active = true;
 				counter_ms = counter_ms - polling_ms;
 				if (counter_ms < 0) {
 				    // Reset ms counter and stop playing
 					reset_counter()
 					timestep = Math.min(t_end, timestep + 1)
-					if (timestep === t_end) playing = false;
+					if (timestep === t_end) running = false;
 				}
 			} else {
 			  reset_counter()
@@ -54,12 +54,12 @@
         if (timestep === t_end) {
             timestep = t_start;
         }
-        playing = !playing;
+        running = !running;
     }
 </script>
 
 <TooltipButton {tooltip} side="bottom" size="icon" {onclick}>
-    {#if playing}
+    {#if running}
         <Pause />
     {:else if timestep === t_end}
         <Undo2 />

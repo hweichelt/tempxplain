@@ -35,6 +35,7 @@
     let t_counter_seconds = $state(2);
     let t_conter_poll = $state(250);
     let t_counter_active = $state(false);
+    let t_counter_running = $state(false);
 
     function prev(){
       timestep = Math.max(t_start, timestep - 1);
@@ -46,10 +47,12 @@
       switch(e.key) {
         case "ArrowLeft":
           e.preventDefault();
+          if (t_counter_running) return;
           prev();
           break;
         case "ArrowRight":
           e.preventDefault();
+          if (t_counter_running) return;
           next();
           break;
       }
@@ -74,10 +77,10 @@
             />
         </div>
         <div class="flex items-center gap-2 p-4">
-            <PlayButton {t_start} {t_end} bind:timestep bind:counter={t_counter} step_seconds={t_counter_seconds} polling_ms={t_conter_poll} bind:active={t_counter_active} />
-            <TooltipButton tooltip="Previous" kbd="◄" size="icon" variant="secondary" onclick={prev} disabled={timestep === t_start}><ChevronLeft /></TooltipButton>
+            <PlayButton {t_start} {t_end} bind:timestep bind:counter={t_counter} step_seconds={t_counter_seconds} polling_ms={t_conter_poll} bind:active={t_counter_active} bind:running={t_counter_running} />
+            <TooltipButton tooltip="Previous" kbd="◄" size="icon" variant="secondary" onclick={prev} disabled={timestep === t_start || t_counter_running}><ChevronLeft /></TooltipButton>
             <div class="bg-card h-8 w-8 rounded-md flex flex-row items-center justify-center select-none border">{timestep}</div>
-            <TooltipButton tooltip="Next" kbd="►" size="icon" variant="secondary" onclick={next} disabled={timestep === t_end}><ChevronRight /></TooltipButton>
+            <TooltipButton tooltip="Next" kbd="►" size="icon" variant="secondary" onclick={next} disabled={timestep === t_end || t_counter_running}><ChevronRight /></TooltipButton>
             <ModelFilter bind:filter />
             <ConnectionIndicator />
             <ModeToggle />
