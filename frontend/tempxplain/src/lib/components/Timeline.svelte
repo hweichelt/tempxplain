@@ -11,12 +11,16 @@
         timestep: number;
         filter: ModelMembership;
         fluents: Record<string, ModelMembership[]>;
+        counter: number;
+        counter_seconds: number;
+        counter_active: boolean;
     }
-    let { interval, timestep = $bindable(), filter = $bindable(), fluents }: TimelineProps = $props();
+    let { interval, timestep = $bindable(), filter = $bindable(), fluents, counter, counter_seconds, counter_active }: TimelineProps = $props();
 
     let span = $derived(interval[1] + 1 - interval[0]);
     let grid_cols_steps = $derived(`9rem repeat(${span}, 1fr)`);
     let timestep_width = $state(0);
+    let counter_percent = $derived(100 - counter * 100);
 
     function t_class(t: number, c: string): string {
         return timestep === t ? c : "";
@@ -36,7 +40,11 @@
 <div class="grid grid-rows-[auto_auto_minmax(0,1fr)] h-full">
     <div class="grid shadow-lg z-30" style:grid-template-columns={grid_cols_steps}>
         <!-- TIMELINE -->
-        <div class="bg-card border-b"></div>
+        <div class="relative bg-card border-b">
+            <div class="absolute inset-2 border-2 border-muted-foreground/50 rounded-full overflow-hidden">
+                <div id="progress" class="absolute top-0 left-0 bottom-0 {counter_active ? 'playing' : ''}" style:--length={`${counter_seconds * 1000}ms`}></div>
+            </div>
+        </div>
         {#each { length: span } as _, i (i)}
             <div class="rounded-none bg-card border border-transparent border-b-border border-l-border text-sm h-8 flex flex-row items-center justify-center select-none">{interval[0] + i}</div>
         {/each}
@@ -55,7 +63,7 @@
             {/each}
         {/each}
         <div class="absolute top-0 bottom-0 left-[9rem] right-0 overflow-hidden">
-            <div id="current" class="absolute border-2 border-white border-t-transparent border-b-transparent" style:--step-size={`${timestep_width}px`} style:--step={timestep}>            </div>
+            <div id="current" class="absolute border-2 border-white border-t-transparent border-b-transparent" style:--step-size={`${timestep_width}px`} style:--step={timestep}></div>
         </div>
     </div>
     <div></div>
@@ -91,5 +99,24 @@
     #current:after {
         right: calc(-1 * var(--width) - var(--border-width));
         background: linear-gradient(to right, color-mix(in srgb, var(--gradient-color) var(--gradient-alpha), transparent), transparent);
+    }
+    #progress {
+        --length: 0ms;
+
+        background: linear-gradient(to left,
+            color-mix(in srgb, var(--color-foreground) 50%, transparent),
+            color-mix(in srgb, var(--color-foreground) 25%, transparent) 9rem
+        );
+    }
+    #progress.playing{
+        animation: progress-fill linear var(--length);
+    }
+    @keyframes progress-fill {
+        from {
+            width: 0;
+        }
+        to {
+            width: 100%;
+        }
     }
 </style>

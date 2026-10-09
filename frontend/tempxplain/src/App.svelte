@@ -17,6 +17,7 @@
     import TooltipButton from "$lib/components/TooltipButton.svelte";
     import * as Tooltip from "$lib/components/ui/tooltip/index.js";
     import PanelLabel from "$lib/components/PanelLabel.svelte";
+    import PlayButton from "$lib/components/PlayButton.svelte";
 
     $effect(() => {
         backend.connect().catch(() => {});
@@ -30,6 +31,10 @@
     let fluents = $derived(program_state.explanation?.fluent_matrix);
     let visualization = $state(true);
     let filter: ModelMembership = $state("both");
+    let t_counter = $state(1);
+    let t_counter_seconds = $state(2);
+    let t_conter_poll = $state(250);
+    let t_counter_active = $state(false);
 
     function prev(){
       timestep = Math.max(t_start, timestep - 1);
@@ -69,6 +74,7 @@
             />
         </div>
         <div class="flex items-center gap-2 p-4">
+            <PlayButton {t_start} {t_end} bind:timestep bind:counter={t_counter} step_seconds={t_counter_seconds} polling_ms={t_conter_poll} bind:active={t_counter_active} />
             <TooltipButton tooltip="Previous" kbd="◄" size="icon" variant="secondary" onclick={prev} disabled={timestep === t_start}><ChevronLeft /></TooltipButton>
             <div class="bg-card h-8 w-8 rounded-md flex flex-row items-center justify-center select-none border">{timestep}</div>
             <TooltipButton tooltip="Next" kbd="►" size="icon" variant="secondary" onclick={next} disabled={timestep === t_end}><ChevronRight /></TooltipButton>
@@ -95,6 +101,9 @@
                     interval={timeframe}
                     bind:timestep={timestep}
                     bind:filter
+                    counter={t_counter}
+                    counter_seconds={t_counter_seconds}
+                    counter_active={t_counter_active}
                     fluents={fluents}
                 />
             {:else}
