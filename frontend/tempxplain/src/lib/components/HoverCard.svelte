@@ -21,7 +21,7 @@
     }: HoverCardProps = $props();
 </script>
 
-<HoverCard.Root openDelay={200}>
+<HoverCard.Root openDelay={100}>
     <HoverCard.Trigger rel="noreferrer noopener" {href}>
         {@render trigger()}
     </HoverCard.Trigger>
