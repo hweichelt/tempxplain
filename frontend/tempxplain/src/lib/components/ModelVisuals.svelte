@@ -1,5 +1,6 @@
 <script lang="ts">
-    import Visualization from "./Visualization.svelte";
+    import PanelLabel from "./PanelLabel.svelte";
+import Visualization from "./Visualization.svelte";
 
  interface ModelVisualsProps {
      filter: string;
@@ -11,7 +12,7 @@
 
 <div class="models h-full filter-{filter}">
     <div class="model ref relative p-4 grid grid-rows-[auto_minmax(0,1fr)] gap-2 overflow-hidden">
-        <div class="bg-card/75 label text-sm px-4 py-1 rounded-md justify-self-start font-semibold text-foreground/75 backdrop-blur-lg z-50">REFERENCE</div>
+        <PanelLabel>REFERENCE</PanelLabel>
         <div class="viz z-50">
             <Visualization model="ref" timestep={timestep} {visualization}/>
         </div>
@@ -19,7 +20,7 @@
         <div class="grad absolute bottom-0 left-[50%] translate-x-[-50%] translate-y-[50%] aspect-square w-full z-10 rounded-full bg-radial from-background to-70% to-transparent"></div>
     </div>
     <div class="border-t model foil relative p-4 grid grid-rows-[auto_minmax(0,1fr)] gap-2 overflow-hidden">
-        <div class="bg-card/75 label text-sm px-4 py-1 rounded-md justify-self-start font-semibold text-foreground/75 backdrop-blur-lg z-50">FOIL</div>
+        <PanelLabel>FOIL</PanelLabel>
         <div class="viz z-50">
             <Visualization model="foil" timestep={timestep} {visualization} />
         </div>

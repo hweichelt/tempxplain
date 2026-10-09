@@ -16,6 +16,7 @@
     import { ChevronLeft, ChevronRight } from "@lucide/svelte";
     import TooltipButton from "$lib/components/TooltipButton.svelte";
     import * as Tooltip from "$lib/components/ui/tooltip/index.js";
+    import PanelLabel from "$lib/components/PanelLabel.svelte";
 
     $effect(() => {
         backend.connect().catch(() => {});
@@ -77,9 +78,9 @@
         </div>
     </header>
     <main>
-        <div id="graph" class="p-4 grid grid-rows-[auto_minmax(0,1fr)] gap-4">
+        <div id="graph" class="p-4 grid grid-rows-[auto_minmax(0,1fr)] gap-2">
             <div class="flex flex-row gap-2 items-center">
-                <Badge variant="secondary">EXPLANATION</Badge>
+                <PanelLabel variant="light">EXPLANATION</PanelLabel>
             </div>
             <div>
                 <Skeleton class="w-full h-full" />
