@@ -18,6 +18,7 @@
     import * as Tooltip from "$lib/components/ui/tooltip/index.js";
     import PanelLabel from "$lib/components/PanelLabel.svelte";
     import PlayButton from "$lib/components/PlayButton.svelte";
+    import ExplanationGraph from "$lib/components/graph/ExplanationGraph.svelte";
 
     $effect(() => {
         backend.connect().catch(() => {});
@@ -37,84 +38,116 @@
     let t_counter_active = $state(false);
     let t_counter_running = $state(false);
 
-    function prev(){
-      timestep = Math.max(t_start, timestep - 1);
+    function prev() {
+        timestep = Math.max(t_start, timestep - 1);
     }
-    function next(){
-      timestep = Math.min(t_end, timestep + 1);
+    function next() {
+        timestep = Math.min(t_end, timestep + 1);
     }
     function onKeyDown(e: KeyboardEvent) {
-      switch(e.key) {
-        case "ArrowLeft":
-          e.preventDefault();
-          if (t_counter_running) return;
-          prev();
-          break;
-        case "ArrowRight":
-          e.preventDefault();
-          if (t_counter_running) return;
-          next();
-          break;
-      }
+        switch (e.key) {
+            case "ArrowLeft":
+                e.preventDefault();
+                if (t_counter_running) return;
+                prev();
+                break;
+            case "ArrowRight":
+                e.preventDefault();
+                if (t_counter_running) return;
+                next();
+                break;
+        }
     }
 </script>
 
 <ModeWatcher />
 <!-- Tooltips require a provider above every Tooltip.Root -->
 <Tooltip.Provider>
-<div id="content">
-    <header class="border-b flex items-center justify-between">
-        <div class="px-6">
-            <img
-                src={text_dark}
-                alt="TempXplain"
-                class="h-6 dark:invert not-dark:hidden"
-            />
-            <img
-                src={text_light}
-                alt="TempXplain"
-                class="h-6 dark:invert dark:hidden"
-            />
-        </div>
-        <div class="flex items-center gap-2 p-4">
-            <PlayButton {t_start} {t_end} bind:timestep bind:counter={t_counter} step_seconds={t_counter_seconds} polling_ms={t_conter_poll} bind:active={t_counter_active} bind:running={t_counter_running} />
-            <TooltipButton tooltip="Previous" kbd="◄" size="icon" variant="secondary" onclick={prev} disabled={timestep === t_start || t_counter_running}><ChevronLeft /></TooltipButton>
-            <div class="bg-card h-8 w-8 rounded-md flex flex-row items-center justify-center select-none border">{timestep}</div>
-            <TooltipButton tooltip="Next" kbd="►" size="icon" variant="secondary" onclick={next} disabled={timestep === t_end || t_counter_running}><ChevronRight /></TooltipButton>
-            <ModelFilter bind:filter />
-            <ConnectionIndicator />
-            <ModeToggle />
-        </div>
-    </header>
-    <main>
-        <div id="graph" class="p-4 grid grid-rows-[auto_minmax(0,1fr)] gap-2">
-            <div class="flex flex-row gap-2 items-center">
-                <PanelLabel variant="light">EXPLANATION</PanelLabel>
-            </div>
-            <div>
-                <Skeleton class="w-full h-full" />
-            </div>
-        </div>
-        <div id="visualization" class="border-l">
-            <ModelVisuals bind:filter bind:timestep bind:visualization />
-        </div>
-        <div id="timeline" class="border-t">
-            {#if timeframe !== undefined && fluents !== undefined}
-                <Timeline
-                    interval={timeframe}
-                    bind:timestep={timestep}
-                    bind:filter
-                    counter={t_counter}
-                    counter_seconds={t_counter_seconds}
-                    counter_active={t_counter_active}
-                    fluents={fluents}
+    <div id="content">
+        <header class="border-b flex items-center justify-between">
+            <div class="px-6">
+                <img
+                    src={text_dark}
+                    alt="TempXplain"
+                    class="h-6 dark:invert not-dark:hidden"
                 />
-            {:else}
-                <Skeleton class="w-full h-full" />
-            {/if}
-        </div>
-    </main>
-</div>
+                <img
+                    src={text_light}
+                    alt="TempXplain"
+                    class="h-6 dark:invert dark:hidden"
+                />
+            </div>
+            <div class="flex items-center gap-2 p-4">
+                <PlayButton
+                    {t_start}
+                    {t_end}
+                    bind:timestep
+                    bind:counter={t_counter}
+                    step_seconds={t_counter_seconds}
+                    polling_ms={t_conter_poll}
+                    bind:active={t_counter_active}
+                    bind:running={t_counter_running}
+                />
+                <TooltipButton
+                    tooltip="Previous"
+                    kbd="◄"
+                    size="icon"
+                    variant="secondary"
+                    onclick={prev}
+                    disabled={timestep === t_start || t_counter_running}
+                    ><ChevronLeft /></TooltipButton
+                >
+                <div
+                    class="bg-card h-8 w-8 rounded-md flex flex-row items-center justify-center select-none border"
+                >
+                    {timestep}
+                </div>
+                <TooltipButton
+                    tooltip="Next"
+                    kbd="►"
+                    size="icon"
+                    variant="secondary"
+                    onclick={next}
+                    disabled={timestep === t_end || t_counter_running}
+                    ><ChevronRight /></TooltipButton
+                >
+                <ModelFilter bind:filter />
+                <ConnectionIndicator />
+                <ModeToggle />
+            </div>
+        </header>
+        <main>
+            <div
+                id="graph"
+                class="p-4 grid grid-rows-[auto_minmax(0,1fr)] gap-2"
+            >
+                <div class="flex flex-row gap-2 items-center">
+                    <PanelLabel variant="light">EXPLANATION</PanelLabel>
+                </div>
+                <div>
+                    <ExplanationGraph />
+                </div>
+            </div>
+            <div id="visualization" class="border-l">
+                <ModelVisuals bind:filter bind:timestep bind:visualization />
+            </div>
+            <div id="timeline" class="border-t">
+                {#if timeframe !== undefined && fluents !== undefined}
+                    <Timeline
+                        interval={timeframe}
+                        bind:timestep
+                        bind:filter
+                        counter={t_counter}
+                        counter_seconds={t_counter_seconds}
+                        counter_active={t_counter_active}
+                        {fluents}
+                    />
+                {:else}
+                    <Skeleton class="w-full h-full" />
+                {/if}
+            </div>
+        </main>
+    </div>
 </Tooltip.Provider>
 
 <svelte:window on:keydown={onKeyDown} />
