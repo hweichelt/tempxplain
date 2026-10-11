@@ -1,36 +1,57 @@
-<script>
+<script lang="ts">
     import {
         SvelteFlow,
-        Controls,
-        MiniMap,
         Background,
+        type Edge,
+        type Node,
+        type NodeTypes,
+        Controls,
         BackgroundVariant,
     } from "@xyflow/svelte";
     import "@xyflow/svelte/dist/style.css";
     import { mode } from "mode-watcher";
+    import Skeleton from "../ui/skeleton/skeleton.svelte";
+    import SectionNode from "./SectionNode.svelte";
+    import { example_graph, type GraphData } from "./graph_data";
+    import { layout_graph } from "./layout";
 
-    let nodes = $state.raw([
-        { id: "1", position: { x: 0, y: 0 }, data: { label: "1" } },
-        { id: "2", position: { x: 0, y: 100 }, data: { label: "2" } },
-    ]);
+    interface ExplanationGraphProps {
+        graph?: GraphData;
+    }
+    let { graph = example_graph }: ExplanationGraphProps = $props();
 
-    let edges = $state.raw([{ id: "e1-2", source: "1", target: "2" }]);
+    const nodeTypes: NodeTypes = { section: SectionNode };
+
+    let nodes = $state.raw<Node[]>([]);
+    let edges = $state.raw<Edge[]>([]);
+
+    async function layout(graph: GraphData): Promise<void> {
+        const result = await layout_graph(graph);
+        nodes = result.nodes;
+        edges = result.edges;
+    }
 </script>
 
-<div
-    style:width="100%"
-    style:height="100%"
-    class="border rounded-md overflow-hidden"
->
-    <SvelteFlow
-        bind:nodes
-        bind:edges
-        fitView
-        colorMode={mode.current}
-        attributionPosition="top-left"
+{#await layout(graph)}
+    <Skeleton class="w-full h-full" />
+{:then}
+    <div class="w-full h-full border rounded-md overflow-hidden">
+        <SvelteFlow
+            bind:nodes
+            bind:edges
+            {nodeTypes}
+            fitView
+            colorMode={mode.current}
+            proOptions={{ hideAttribution: true }}
+        >
+            <Background variant={BackgroundVariant.Dots} />
+            <Controls />
+        </SvelteFlow>
+    </div>
+{:catch error}
+    <div
+        class="text-foreground bg-destructive px-4 py-1 text-sm rounded-full justify-self-center self-center"
     >
-        <Controls />
-        <MiniMap />
-        <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
-    </SvelteFlow>
-</div>
+        Layout failed: {error.message}
+    </div>
+{/await}
