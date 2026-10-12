@@ -4,6 +4,7 @@ The backend API.
 Functions are exposed by decorating them with `@rpc.method()`. Their return value has to be JSON serializable.
 """
 
+import json
 from typing import Literal
 
 from tempxplain.server import ServerState
@@ -64,7 +65,8 @@ def get_explanation(state: ServerState) -> Explanation:
     exp = state.explanation
     visualize_domain(state, Model.FOIL, 2)
     return Explanation(
-        graph=exp.graph,
+        program=exp.program,
+        graph=exp.graph.json,
         partitions={t: [str(a.symbol) for a in atoms] for t, atoms in exp.partitions_transformed.items()},
         timeframe_full=exp.interval_transformed,
         timeframe_explanation=exp.interval_transformed,

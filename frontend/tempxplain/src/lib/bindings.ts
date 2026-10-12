@@ -17,8 +17,34 @@ export type ProgramData = {
   files: string[];
 };
 
+export type Node = {
+  type: string;
+  id: string;
+  models: Model[];
+  programs: Model[];
+  time?: number;
+};
+
+export type Edge = {
+  type: "negative" | "positive";
+  source: string;
+  target: string;
+};
+
+export type Query = {
+  query_atom: string;
+  type: string;
+};
+
+export type Graph = {
+  nodes: Node[];
+  edges: Edge[];
+  query: Query[];
+};
+
 export type Explanation = {
-  graph: string;
+  program: string;
+  graph: Graph;
   partitions: Record<number, string[]>;
   timeframe_full: [number, number];
   timeframe_explanation: [number, number];

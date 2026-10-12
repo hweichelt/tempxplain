@@ -14,6 +14,7 @@ from asplain.utils.clingo import get_query_prg, symbols_to_prg
 from clingo import SolveHandle, Symbol
 from clingo.script import enable_python
 
+from tempxplain.graph import TemporalExplanationGraph
 from tempxplain.temporal import AtomType, atom_base, atom_time, atom_type, is_action, is_fluent
 from tempxplain.utils.logging import get_logger
 from tempxplain.utils.symbols import to_program
@@ -128,9 +129,14 @@ class Explanation:
         return set(transform_temporal(self.symbols))
 
     @cached_property
-    def graph(self) -> str:
+    def program(self) -> str:
         """The explanation graph as a program string."""
         return to_program(self.symbols_transformed)
+
+    @cached_property
+    def graph(self) -> TemporalExplanationGraph:
+        """The explanation graph."""
+        return TemporalExplanationGraph.from_symbols(self.symbols_transformed)
 
     @cached_property
     def atoms(self) -> set[Atom]:

@@ -4,7 +4,7 @@ import ELK, {
 } from "elkjs/lib/elk.bundled.js";
 import { MarkerType, Position, type Edge, type Node } from "@xyflow/svelte";
 
-import type { GraphData, GraphNode } from "./graph_data";
+import type { Graph, Node as BackendNode } from "$lib/bindings";
 
 export type SectionData = { label: string };
 export type LayoutResult = { nodes: Node[]; edges: Edge[] };
@@ -17,6 +17,10 @@ const STATIC_SECTION_ID = "section:static";
 
 const elk = new ELK();
 
+export function edge_id(source: string, target: string): string {
+  return [source, target].join("-");
+}
+
 export function section_id(t: number | null): string {
   return t === null ? STATIC_SECTION_ID : `section:${t}`;
 }
@@ -25,20 +29,22 @@ function section_label(t: number | null): string {
   return t === null ? "static" : `${t}`;
 }
 
-/* TODO : Maybe do this in the backend already and pass a complex graph object */
 function group_by_timepoint(
-  nodes: GraphNode[],
-): [number | null, GraphNode[]][] {
-  const sections = new Map<number | null, GraphNode[]>();
+  nodes: BackendNode[],
+): [number | null, BackendNode[]][] {
+  const sections = new Map<number | null, BackendNode[]>();
   for (const node of nodes) {
-    sections.set(node.t, [...(sections.get(node.t) ?? []), node]);
+    sections.set(node.time ?? null, [
+      ...(sections.get(node.time ?? null) ?? []),
+      node,
+    ]);
   }
   return [...sections.entries()].sort(
     ([a], [b]) => (a ?? -Infinity) - (b ?? -Infinity),
   );
 }
 
-function to_elk_graph(data: GraphData): ElkNode {
+function to_elk_graph(data: Graph): ElkNode {
   const children: ElkNode[] = group_by_timepoint(data.nodes).map(
     ([t, nodes], partition) => ({
       id: section_id(t),
@@ -54,7 +60,7 @@ function to_elk_graph(data: GraphData): ElkNode {
     }),
   );
   const edges: ElkExtendedEdge[] = data.edges.map((edge) => ({
-    id: edge.id,
+    id: edge_id(edge.source, edge.target),
     sources: [edge.source],
     targets: [edge.target],
   }));
@@ -74,8 +80,8 @@ function to_elk_graph(data: GraphData): ElkNode {
   };
 }
 
-export async function layout_graph(data: GraphData): Promise<LayoutResult> {
-  const labels = new Map(data.nodes.map((node) => [node.id, node.label]));
+export async function layout_graph(data: Graph): Promise<LayoutResult> {
+  const labels = new Map(data.nodes.map((node) => [node.id, node.id]));
   const result = await elk.layout(to_elk_graph(data));
 
   const nodes: Node[] = [];
@@ -111,7 +117,10 @@ export async function layout_graph(data: GraphData): Promise<LayoutResult> {
   }
 
   const edges: Edge[] = data.edges.map((edge) => ({
-    ...edge,
+    // ...edge,
+    id: edge_id(edge.source, edge.target),
+    source: edge.source,
+    target: edge.target,
     type: "smoothstep",
     markerEnd: { type: MarkerType.ArrowClosed },
   }));

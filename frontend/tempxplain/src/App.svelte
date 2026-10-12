@@ -125,7 +125,14 @@
                     <PanelLabel variant="light">EXPLANATION</PanelLabel>
                 </div>
                 <div>
-                    <ExplanationGraph />
+                    {#if program_state.explanation === undefined}
+                        <Skeleton class="w-full h-full" />
+                    {:else}
+                        <ExplanationGraph
+                            graph={program_state.explanation.graph}
+                            {timestep}
+                        />
+                    {/if}
                 </div>
             </div>
             <div id="visualization" class="border-l">

@@ -45,9 +45,9 @@ class ServerState:
         )
         log.info(f"Writing explanation graph to disk: {PATH_EXPLANATION_GRAPH}")
         with open(f"{PATH_EXPLANATION_GRAPH}.lp", "w") as f:
-            f.write(exp.graph)
+            f.write(exp.program)
         viz_graph(
-            pg=exp.graph,
+            pg=exp.program,
             title="Explanation Graph",
             name=f"{PATH_EXPLANATION_GRAPH}.lp",
         )

@@ -16,6 +16,7 @@ or
 
 import asyncio
 import dataclasses
+import enum
 import inspect
 import json
 from collections.abc import Callable
@@ -45,6 +46,8 @@ def _to_json(value: object) -> object:
     """Convert values that `json` cannot serialize by itself."""
     if dataclasses.is_dataclass(value) and not isinstance(value, type):
         return dataclasses.asdict(value)
+    if isinstance(value, enum.Enum):
+        return value.value
     raise TypeError(f"Object of type {type(value).__name__} is not JSON serializable")
 
 

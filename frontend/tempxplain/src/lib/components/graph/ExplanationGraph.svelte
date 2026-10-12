@@ -12,16 +12,17 @@
     import "@xyflow/svelte/dist/style.css";
     import { mode } from "mode-watcher";
     import Skeleton from "../ui/skeleton/skeleton.svelte";
-    import Button from "../ui/button/button.svelte";
     import SectionNode from "./SectionNode.svelte";
     import FlowControl from "./FlowControl.svelte";
-    import { example_graph, type GraphData } from "./graph_data";
     import { layout_graph, section_id } from "./layout";
+    import { program_state } from "$lib/state/program_state.svelte";
+    import type { Graph } from "$lib/bindings";
 
     interface ExplanationGraphProps {
-        graph?: GraphData;
+        graph: Graph;
+        timestep: number;
     }
-    let { graph = example_graph }: ExplanationGraphProps = $props();
+    let { graph, timestep }: ExplanationGraphProps = $props();
 
     const nodeTypes: NodeTypes = { section: SectionNode };
 
@@ -29,7 +30,7 @@
     let edges = $state.raw<Edge[]>([]);
     let flow_control = $state<FlowControl>();
 
-    async function layout(graph: GraphData): Promise<void> {
+    async function layout(graph: Graph): Promise<void> {
         const result = await layout_graph(graph);
         nodes = result.nodes;
         edges = result.edges;
@@ -41,44 +42,24 @@
     ): Promise<boolean> {
         return flow_control?.pan(ids, options) ?? Promise.resolve(false);
     }
-
-    const timepoints = $state([0, 1, 2]);
 </script>
 
 {#await layout(graph)}
     <Skeleton class="w-full h-full" />
 {:then}
-    <div class="relative h-full w-full">
-        <div
-            class="absolute top-2 right-2 z-20 flex gap-1 mb-2 bg-card p-2 rounded-lg border"
+    <div class="w-full h-full border rounded-md overflow-hidden">
+        <SvelteFlow
+            bind:nodes
+            bind:edges
+            {nodeTypes}
+            fitView
+            colorMode={mode.current}
+            proOptions={{ hideAttribution: true }}
         >
-            <Button size="sm" variant="outline" onclick={() => focus()}
-                >all</Button
-            >
-            {#each timepoints as t (t)}
-                <Button
-                    size="sm"
-                    variant="outline"
-                    onclick={() => focus([section_id(t)])}
-                >
-                    {t ?? "static"}
-                </Button>
-            {/each}
-        </div>
-        <div class="w-full h-full border rounded-md overflow-hidden">
-            <SvelteFlow
-                bind:nodes
-                bind:edges
-                {nodeTypes}
-                fitView
-                colorMode={mode.current}
-                proOptions={{ hideAttribution: true }}
-            >
-                <FlowControl bind:this={flow_control} />
-                <Background variant={BackgroundVariant.Dots} />
-                <Controls />
-            </SvelteFlow>
-        </div>
+            <FlowControl bind:this={flow_control} />
+            <Background variant={BackgroundVariant.Dots} />
+            <Controls />
+        </SvelteFlow>
     </div>
 {:catch error}
     <div

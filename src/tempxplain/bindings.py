@@ -2,12 +2,15 @@
 
 from dataclasses import dataclass
 
+from asplain.llm.utils.graph import JsonGraph
+
 
 @dataclass
 class Explanation:
     """Details of the logic program."""
 
-    graph: str
+    program: str
+    graph: JsonGraph
     partitions: dict[int, list[str]]
     timeframe_full: tuple[int, int]
     timeframe_explanation: tuple[int, int]
