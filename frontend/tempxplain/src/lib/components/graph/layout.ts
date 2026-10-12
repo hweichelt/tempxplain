@@ -17,7 +17,7 @@ const STATIC_SECTION_ID = "section:static";
 
 const elk = new ELK();
 
-function section_id(t: number | null): string {
+export function section_id(t: number | null): string {
   return t === null ? STATIC_SECTION_ID : `section:${t}`;
 }
 
