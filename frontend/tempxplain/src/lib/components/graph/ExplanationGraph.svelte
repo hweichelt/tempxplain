@@ -10,12 +10,12 @@
         type NodeTypes,
     } from "@xyflow/svelte";
     import "@xyflow/svelte/dist/style.css";
+    import { untrack } from "svelte";
     import { mode } from "mode-watcher";
     import Skeleton from "../ui/skeleton/skeleton.svelte";
     import SectionNode from "./SectionNode.svelte";
     import FlowControl from "./FlowControl.svelte";
     import { layout_graph, section_id } from "./layout";
-    import { program_state } from "$lib/state/program_state.svelte";
     import type { Graph } from "$lib/bindings";
 
     interface ExplanationGraphProps {
@@ -30,6 +30,15 @@
     let edges = $state.raw<Edge[]>([]);
     let flow_control = $state<FlowControl>();
 
+    // updater variable for focusing the current timestep
+    let initialized = $state(0);
+
+    const timepoints = $derived(
+        new Set(
+            graph.nodes.map((node) => node.time).filter((t) => t !== undefined),
+        ),
+    );
+
     async function layout(graph: Graph): Promise<void> {
         const result = await layout_graph(graph);
         nodes = result.nodes;
@@ -42,6 +51,15 @@
     ): Promise<boolean> {
         return flow_control?.pan(ids, options) ?? Promise.resolve(false);
     }
+
+    // pan to the current timestep if the flow has been initialized
+    $effect(() => {
+        if (initialized === 0) return;
+        const ids = timepoints.has(timestep)
+            ? [section_id(timestep)]
+            : undefined;
+        untrack(() => focus(ids));
+    });
 </script>
 
 {#await layout(graph)}
@@ -55,6 +73,7 @@
             fitView
             colorMode={mode.current}
             proOptions={{ hideAttribution: true }}
+            oninit={() => initialized++}
         >
             <FlowControl bind:this={flow_control} />
             <Background variant={BackgroundVariant.Dots} />

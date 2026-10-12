@@ -121,7 +121,6 @@ export async function layout_graph(data: Graph): Promise<LayoutResult> {
     id: edge_id(edge.source, edge.target),
     source: edge.source,
     target: edge.target,
-    type: "smoothstep",
     markerEnd: { type: MarkerType.ArrowClosed },
   }));
 
