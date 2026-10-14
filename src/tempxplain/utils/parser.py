@@ -7,7 +7,7 @@ from importlib import metadata
 from textwrap import dedent
 from typing import Any, cast
 
-from ..server import DEFAULT_FRONTEND_PORT, DEFAULT_HOST, DEFAULT_PORT
+from ..backend.server import DEFAULT_FRONTEND_PORT, DEFAULT_HOST, DEFAULT_PORT
 from . import logging
 
 __all__ = ["get_parser"]
