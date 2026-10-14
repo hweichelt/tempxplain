@@ -24,7 +24,7 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      inkscape:zoom="0.91668771"
-     inkscape:cx="155.99642"
+     inkscape:cx="155.45098"
      inkscape:cy="35.453732"
      inkscape:window-width="2327"
      inkscape:window-height="1238"
@@ -39,16 +39,10 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(-22.224491,-70.23262)">
-    <text
-       xml:space="preserve"
-       style="font-size:35.2778px;font-family:'JetBrains Mono';-inkscape-font-specification:'JetBrains Mono, @wght=200';font-variation-settings:'wght' 200;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;opacity:1;fill:#37474f;fill-opacity:1;stroke-width:8.99999;stroke-linecap:round"
-       x="22.224491"
-       y="96.690971"
-       id="text1"><tspan
-         sodipodi:role="line"
-         id="tspan1"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:35.2778px;font-family:Tiny5;-inkscape-font-specification:'Tiny5, @wght=200';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;font-variation-settings:'wght' 200;fill:#37474f;fill-opacity:1;stroke-width:9"
-         x="22.224491"
-         y="96.690971">TempXplain</tspan></text>
+    <path
+       style="font-size:35.2778px;font-family:Tiny5;-inkscape-font-specification:'Tiny5, @wght=200';font-variation-settings:'wght' 200;fill:#37474f;stroke-width:9;stroke-linecap:round"
+       d="m 31.043941,96.690971 h -4.409725 v -17.6389 h -4.409725 v -4.409726 h 13.229176 v 4.409726 h -4.409726 z m 13.229176,-4.409725 h -4.409725 v -8.81945 h 4.409725 v -4.409725 h 4.409725 v 4.409725 h 4.409725 v 4.409725 h -8.81945 z m 0,4.409725 v -4.409725 h 8.81945 v 4.409725 z m 17.638901,0 h -4.409725 v -17.6389 h 17.6389 v 4.409725 H 70.731468 V 96.690971 H 66.321743 V 83.461796 h -4.409725 z m 17.638901,0 H 75.141193 V 83.461796 h 4.409726 z m 13.229175,-4.409725 v 4.409725 H 88.370369 V 101.1007 H 83.960644 V 79.052071 h 8.81945 v 4.409725 h -4.409725 v 8.81945 z m 4.409725,0 h -4.409725 v -8.81945 h 4.409725 z m 8.819451,-8.81945 h -4.40973 v -8.819451 h 4.40973 z m 8.81945,0 h -4.40973 v -8.819451 h 4.40973 z m -4.40973,0 v 4.409725 h -4.40972 v -4.409725 z m -4.40972,13.229175 h -4.40973 v -8.81945 h 4.40973 z m 8.81945,0 h -4.40973 v -8.81945 h 4.40973 z m 13.22918,-4.409725 v 4.409725 h -4.40973 v 4.409729 h -4.40972 V 79.052071 h 8.81945 v 4.409725 h -4.40973 v 8.81945 z m 4.40972,0 h -4.40972 v -8.81945 h 4.40972 z m 8.81945,4.409725 h -4.40972 V 74.642345 h 4.40972 z m 8.81945,0 v -4.409725 h -4.40972 v -8.81945 h 4.40972 v 8.81945 h 4.40973 v -8.81945 h -4.40973 v -4.409725 h 8.81945 v 17.6389 z M 163.3357,74.642345 V 70.23262 h 4.40972 v 4.409725 z m 4.40972,22.048626 h -4.40972 v -17.6389 h 4.40972 z m 8.81946,0 h -4.40972 v -17.6389 h 8.81945 v 4.409725 h -4.40973 z m 8.81945,0 h -4.40972 V 83.461796 h 4.40972 z"
+       id="text1"
+       aria-label="TempXplain" />
   </g>
 </svg>
