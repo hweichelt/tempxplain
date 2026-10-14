@@ -4,7 +4,6 @@ The backend API.
 Functions are exposed by decorating them with `@rpc.method()`. Their return value has to be JSON serializable.
 """
 
-import json
 from typing import Literal
 
 from tempxplain.server import ServerState

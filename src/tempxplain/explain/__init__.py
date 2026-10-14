@@ -14,19 +14,18 @@ from asplain.utils.clingo import get_query_prg, symbols_to_prg
 from clingo import SolveHandle, Symbol
 from clingo.script import enable_python
 
-from tempxplain.graph import TemporalExplanationGraph
-from tempxplain.temporal import AtomType, atom_base, atom_time, atom_type, is_action, is_fluent
-from tempxplain.utils.logging import get_logger
-from tempxplain.utils.symbols import to_program
-
-from .utils.io import read_file
+from ..utils.io import read_file
+from ..utils.logging import get_logger
+from ..utils.symbols import to_program
+from .graph import TemporalExplanationGraph
+from .temporal import AtomType, atom_base, atom_time, atom_type, is_action, is_fluent
 
 log = get_logger("server.explain")
 
 # Enable python for the clingo encodings in asplain using it
 enable_python()
 
-DEFAULT_COST_ENCODING = Path(__file__).parent / "encodings" / "cost" / "default.lp"
+DEFAULT_COST_ENCODING = Path(__file__).parent.parent / "encodings" / "cost" / "default.lp"
 NUMBER_OF_EXPLANATIONS = 1
 QUERY_NEGATION_PREFIX = "-"
 MODEL_STRING_REF_TYPE = Literal["ref"]
