@@ -11,8 +11,8 @@ from graphviz import Digraph
 from tempxplain.utils.logging import get_logger
 from tempxplain.utils.symbols import to_program
 
+from .backend.server import ServerState
 from .explain import Model
-from .server import ServerState
 
 __all__ = ["visualize_domain"]
 

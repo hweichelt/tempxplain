@@ -22,7 +22,7 @@ import json
 from collections.abc import Callable
 from typing import Any, Generic, TypeVar
 
-from .utils.logging import get_logger
+from ..utils.logging import get_logger
 
 __all__ = ["Registry", "RpcError"]
 

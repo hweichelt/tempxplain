@@ -9,10 +9,10 @@ from asplain.utils.viz import viz_graph
 from websockets.asyncio.server import Server, ServerConnection, serve
 from websockets.exceptions import ConnectionClosed
 
+from ..explain import Explanation, explanation
+from ..utils.logging import get_logger
 from .bindings import ProgramData
-from .explain import Explanation, explanation
 from .rpc import Registry
-from .utils.logging import get_logger
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8765

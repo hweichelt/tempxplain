@@ -6,9 +6,9 @@ import asyncio
 import sys
 from logging import Logger
 
-from .api import ProgramData, ServerState, rpc
+from .backend.api import ProgramData, ServerState, rpc
+from .backend.server import run_server
 from .frontend import open_frontend, start_frontend
-from .server import run_server
 from .utils.logging import configure_logging, get_logger
 from .utils.parser import get_parser
 

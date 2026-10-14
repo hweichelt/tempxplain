@@ -6,13 +6,12 @@ Functions are exposed by decorating them with `@rpc.method()`. Their return valu
 
 from typing import Literal
 
-from tempxplain.server import ServerState
-
+from ..explain import MODEL_STRING_FOIL_TYPE, MODEL_STRING_REF_TYPE, Model
+from ..utils.logging import get_logger
+from ..visualize import visualize_domain
 from .bindings import Explanation, ProgramData
-from .explain import MODEL_STRING_FOIL_TYPE, MODEL_STRING_REF_TYPE, Model
 from .rpc import Registry
-from .utils.logging import get_logger
-from .visualize import visualize_domain
+from .server import ServerState
 
 __all__ = ["rpc"]
 
