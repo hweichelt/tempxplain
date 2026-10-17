@@ -12,8 +12,8 @@ dynamic = ["version"]
 readme = "README.md"
 dependencies = [
     "clingo==5.8",
-    "asplain@git+https://github.com/potassco/asplain#egg=feature/temporal",
-    "tempql@git+https://github.com/hweichelt/tempql#egg=main",
+    "asplain @ git+https://github.com/potassco/asplain@feature/temporal",
+    "tempql @ git+https://github.com/hweichelt/tempql@main",
     "websockets>=14",
 ]
 
