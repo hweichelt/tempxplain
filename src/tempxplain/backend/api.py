@@ -8,6 +8,7 @@ from typing import Literal
 
 from tempql.error import ParseError
 from tempql.parser import parse
+from tempql.utils import to_tex
 
 from ..explain import MODEL_STRING_FOIL_TYPE, MODEL_STRING_REF_TYPE, Model
 from ..utils.logging import get_logger
@@ -80,10 +81,10 @@ def get_explanation(state: ServerState) -> Explanation:
 @rpc.method()
 def parse_query(state: ServerState, query_raw: str) -> QueryResult:
     """Get data for the input programs."""
-    log.info(f"Parsing query: {query_raw}")
+    log.debug(f"Parsing query: {query_raw}")
     try:
         queries = parse(query_raw)
-        return QueryResult(query_raw, [Query("RAW", "TEX", q.timestep) for q in queries], None)
+        return QueryResult(query_raw, [Query("RAW", to_tex(q), q.timestep) for q in queries], None)
     except ParseError as e:
         error = QueryError(e.message, e.start, e.end)
         return QueryResult(query_raw, None, error)

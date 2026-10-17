@@ -17,6 +17,8 @@
     let query = $state("");
     let query_correct = $derived(query_state.error === undefined);
 
+    let parsed_queries = $derived(query_state.parsed);
+
     function parse_query() {
         query_state.set_raw(query);
     }
@@ -71,13 +73,25 @@
                 </Field.Field>
                 <Label for="username-1">Preview</Label>
                 <div
-                    id="query-preview"
-                    class="bg-card h-25 rounded-md text-lg flex items-center justify-center"
+                    class="previews flex flex-col gap-2 {query_correct
+                        ? ''
+                        : 'wrong'}"
                 >
-                    <Formula
-                        tex="\bigcirc at(1) \land \Diamond at(4)"
-                        display={true}
-                    />
+                    {#if parsed_queries === undefined || parsed_queries.length === 0}
+                        <div
+                            id="query-preview"
+                            class="bg-card h-15 rounded-md"
+                        ></div>
+                    {:else}
+                        {#each parsed_queries as q, i (i)}
+                            <div
+                                id="query-preview"
+                                class="bg-card h-15 rounded-md text-base flex items-center justify-center"
+                            >
+                                <Formula tex={q.tex} display={true} />
+                            </div>
+                        {/each}
+                    {/if}
                 </div>
             </Field.Group>
             <Dialog.Footer>
@@ -94,3 +108,12 @@
         </Dialog.Content>
     </form>
 </Dialog.Root>
+
+<style>
+    .previews {
+        transition: opacity 100ms;
+    }
+    .previews.wrong {
+        opacity: 0.5;
+    }
+</style>
