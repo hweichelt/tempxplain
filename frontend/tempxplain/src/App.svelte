@@ -19,6 +19,7 @@
     import PanelLabel from "$lib/components/PanelLabel.svelte";
     import PlayButton from "$lib/components/PlayButton.svelte";
     import ExplanationGraph from "$lib/components/graph/ExplanationGraph.svelte";
+    import QueryEditor from "$lib/components/QueryEditor.svelte";
 
     $effect(() => {
         backend.connect().catch(() => {});
@@ -37,6 +38,11 @@
     let t_conter_poll = $state(250);
     let t_counter_active = $state(false);
     let t_counter_running = $state(false);
+    let query_dialog_open = $state(true);
+
+    let keyboard_controls_blocked = $derived(
+        t_counter_running || query_dialog_open,
+    );
 
     function prev() {
         timestep = Math.max(t_start, timestep - 1);
@@ -47,13 +53,13 @@
     function onKeyDown(e: KeyboardEvent) {
         switch (e.key) {
             case "ArrowLeft":
+                if (keyboard_controls_blocked) return;
                 e.preventDefault();
-                if (t_counter_running) return;
                 prev();
                 break;
             case "ArrowRight":
+                if (keyboard_controls_blocked) return;
                 e.preventDefault();
-                if (t_counter_running) return;
                 next();
                 break;
         }
@@ -77,6 +83,7 @@
                     class="h-6 dark:invert dark:hidden"
                 />
             </div>
+            <QueryEditor bind:dialog_open={query_dialog_open} />
             <div class="flex items-center gap-2 p-4">
                 <PlayButton
                     {t_start}
