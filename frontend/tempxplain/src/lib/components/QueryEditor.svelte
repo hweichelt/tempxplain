@@ -4,8 +4,7 @@
     import { Button, buttonVariants } from "$lib/components/ui/button/index.js";
     import { Input } from "$lib/components/ui/input/index.js";
     import { Label } from "$lib/components/ui/label/index.js";
-    import { Check, Cross, X } from "@lucide/svelte";
-    import { derived } from "svelte/store";
+    import BooleanIndicator from "./BooleanIndicator.svelte";
 
     interface QueryEditorProps {
         dialog_open: boolean;
@@ -13,13 +12,7 @@
     let { dialog_open = $bindable() }: QueryEditorProps = $props();
 
     let query = $state("");
-    let query_correct = $state(false);
-
-    let query_correct_class = $derived(
-        query_correct
-            ? "bg-success/40 border-success"
-            : "bg-destructive/40 border-destructive",
-    );
+    let query_correct = $derived(query.length % 2 === 0 && query.length > 0);
 </script>
 
 <Dialog.Root
@@ -63,13 +56,9 @@
                         bind:value={query}
                     />
                     <div
-                        class="absolute bottom-1.5 right-2 h-5 w-5! flex items-center justify-center border-2 rounded-full border {query_correct_class}"
+                        class="absolute bottom-0 pointer-events-none flex justify-end px-2 py-1.5"
                     >
-                        {#if query_correct}
-                            <Check class="h-3 w-3" />
-                        {:else}
-                            <X class="h-3 w-3" />
-                        {/if}
+                        <BooleanIndicator value={query_correct} />
                     </div>
                 </Field.Field>
                 <Label for="username-1">Preview</Label>
