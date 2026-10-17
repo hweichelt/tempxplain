@@ -7,6 +7,7 @@
     import BooleanIndicator from "./BooleanIndicator.svelte";
     import { backend } from "$lib/backend.svelte";
     import { query_state } from "$lib/state/query_state.svelte";
+    import Formula from "./Formula.svelte";
 
     interface QueryEditorProps {
         dialog_open: boolean;
@@ -69,7 +70,15 @@
                     </div>
                 </Field.Field>
                 <Label for="username-1">Preview</Label>
-                <div id="query-preview" class="bg-card h-25 rounded-md"></div>
+                <div
+                    id="query-preview"
+                    class="bg-card h-25 rounded-md text-lg flex items-center justify-center"
+                >
+                    <Formula
+                        tex="\bigcirc at(1) \land \Diamond at(4)"
+                        display={true}
+                    />
+                </div>
             </Field.Group>
             <Dialog.Footer>
                 <Dialog.Close
