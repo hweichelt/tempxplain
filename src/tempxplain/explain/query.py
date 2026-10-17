@@ -1,41 +1,43 @@
 """Functionality for parsing the queries of temporal explanations."""
 
-import clingo
+from collections.abc import Iterable
+
 from asplain.utils.logging import get_logger
 from clingo import Symbol
-
-QUERY_NEGATION_PREFIX = "-"
-
+from tempql.parser import parse
+from tempql.semantics import semantics
+from tempql.utils import to_symbol
 
 log = get_logger("query")
 
+RULES_TEMPORAL_QUERY_FOIL_FINDING = """
+__disable_default_queries__.
 
-def get_query_prg(query_include: list[Symbol], query_exclude: list[Symbol]) -> str:
-    """
-    Get the query program string for the given included and excluded query atoms.
+% Classify temporal queries
+temporal(temporal(Q,T)) :- query(temporal(Q,T),_).
 
-    Args:
-        query_include: A list of symbols to include in the query.
-        query_exclude: A list of symbols to exclude from the query.
+% Normal queries
+:- query(A,0), not temporal(A), model(A, foil).
+:- query(A,1), not temporal(A), not model(A, foil).
 
-    Returns:
-        A string representing the query as an ASP program.
-    """
-    qi = "".join([f"query({str(s)},1)." for s in query_include])
-    qe = "".join([f"query({str(s)},0)." for s in query_exclude])
-    return qi + qe
+% Temporal queries
+:- query(temporal(Q,T),0), holds(Q,T).
+:- query(temporal(Q,T),1), not holds(Q,T).
+"""
 
 
-def parse_query_program(query: str) -> str:
-    """Parse a query to get the query program for asplain."""
-    query_include: list[Symbol] = []
-    query_exclude: list[Symbol] = []
-    for literal in query.strip().split():
-        if literal.startswith(QUERY_NEGATION_PREFIX):
-            query_exclude.append(clingo.parse_term(literal.removeprefix(QUERY_NEGATION_PREFIX)))
-        else:
-            query_include.append(clingo.parse_term(literal))
+def to_program(query_symbols: Iterable[Symbol]) -> str:
+    """Convert the given query symbols to an ASP program string."""
+    query_string = " ".join(f"{q}." for q in query_symbols)
+    semantics_string = semantics()
+    program = f"{semantics_string}\n{query_string}\n{RULES_TEMPORAL_QUERY_FOIL_FINDING}"
+    return program
 
-    query_program = get_query_prg(query_include, query_exclude)
+
+def parse_query_program(query_raw: str) -> str:
+    """Parse a tempql query to get the query program for asplain."""
+    queries = parse(query_raw)
+    query_symbols = [to_symbol(q) for q in queries]
+    query_program = to_program(query_symbols)
     log.info(f"Query program: {query_program}")
     return query_program

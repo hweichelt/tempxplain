@@ -58,7 +58,10 @@ def get_parser() -> ArgumentParser:
         help=f"logic program files to load, {SYMBOL_STDIN} reads from standard input",
     )
     parser.add_argument(
-        "-q", "--query", required=True, help="the query that should be satisfied in the foil model. (negation with '-')"
+        "-q",
+        "--query",
+        required=True,
+        help="the query that should be satisfied in the foil model. (Follows the tempql syntax)",
     )
     parser.add_argument("--viz", help="visualization encoding for a domain timestep")
 
