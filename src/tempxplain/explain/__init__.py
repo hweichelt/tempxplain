@@ -10,9 +10,11 @@ from typing import Literal, cast, get_args
 import clingo
 from asplain import construct_program_graph, set_foil_ctl, set_model_subgraphs_ctl
 from asplain.transformations.transformers import Transformation, apply_transformation_sequence
-from asplain.utils.clingo import get_query_prg, symbols_to_prg
+from asplain.utils.clingo import symbols_to_prg
 from clingo import SolveHandle, Symbol
 from clingo.script import enable_python
+
+from tempxplain.explain.query import parse_query_program
 
 from ..utils.io import read_file
 from ..utils.logging import get_logger
@@ -27,7 +29,6 @@ enable_python()
 
 DEFAULT_COST_ENCODING = Path(__file__).parent.parent / "encodings" / "cost" / "default.lp"
 NUMBER_OF_EXPLANATIONS = 1
-QUERY_NEGATION_PREFIX = "-"
 MODEL_STRING_REF_TYPE = Literal["ref"]
 MODEL_STRING_REF: Literal["ref"] = get_args(MODEL_STRING_REF_TYPE)[0]
 MODEL_STRING_FOIL_TYPE = Literal["foil"]
@@ -223,18 +224,6 @@ class Explanation:
         atoms_t = atoms_model_partition_t.union(atoms_static)
         log.info(f"Model state at t={t}: {[str(a) for a in atoms_t]}")
         return atoms_t
-
-
-def parse_query_program(query: str) -> str:
-    """Parse a query to get the query program for asplain."""
-    query_include: list[Symbol] = []
-    query_exclude: list[Symbol] = []
-    for literal in query.strip().split():
-        if literal.startswith(QUERY_NEGATION_PREFIX):
-            query_exclude.append(clingo.parse_term(literal.removeprefix(QUERY_NEGATION_PREFIX)))
-        else:
-            query_include.append(clingo.parse_term(literal))
-    return get_query_prg(query_include, query_exclude)
 
 
 def parse_model(model_prg: str) -> list[str] | None:
