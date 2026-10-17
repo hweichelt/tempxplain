@@ -5,6 +5,8 @@
     import { Input } from "$lib/components/ui/input/index.js";
     import { Label } from "$lib/components/ui/label/index.js";
     import BooleanIndicator from "./BooleanIndicator.svelte";
+    import { backend } from "$lib/backend.svelte";
+    import { query_state } from "$lib/state/query_state.svelte";
 
     interface QueryEditorProps {
         dialog_open: boolean;
@@ -12,7 +14,11 @@
     let { dialog_open = $bindable() }: QueryEditorProps = $props();
 
     let query = $state("");
-    let query_correct = $derived(query.length % 2 === 0 && query.length > 0);
+    let query_correct = $derived(query_state.error === undefined);
+
+    function parse_query() {
+        query_state.set_raw(query);
+    }
 </script>
 
 <Dialog.Root
@@ -54,6 +60,7 @@
                         placeholder="e.g. F[at(3)] @ 2"
                         autocomplete="off"
                         bind:value={query}
+                        oninput={parse_query}
                     />
                     <div
                         class="absolute bottom-0 pointer-events-none flex justify-end px-2 py-1.5"

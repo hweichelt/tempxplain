@@ -6,10 +6,13 @@ Functions are exposed by decorating them with `@rpc.method()`. Their return valu
 
 from typing import Literal
 
+from tempql.error import ParseError
+from tempql.parser import parse
+
 from ..explain import MODEL_STRING_FOIL_TYPE, MODEL_STRING_REF_TYPE, Model
 from ..utils.logging import get_logger
 from ..visualize import visualize_domain
-from .bindings import Explanation, ProgramData
+from .bindings import Explanation, ProgramData, Query, QueryError, QueryResult
 from .rpc import Registry
 from .server import ServerState
 
@@ -72,3 +75,15 @@ def get_explanation(state: ServerState) -> Explanation:
             str(f): [m.value for m in membership] for f, membership in exp.fluent_matrix_transformed.items()
         },
     )
+
+
+@rpc.method()
+def parse_query(state: ServerState, query_raw: str) -> QueryResult:
+    """Get data for the input programs."""
+    log.info(f"Parsing query: {query_raw}")
+    try:
+        queries = parse(query_raw)
+        return QueryResult(query_raw, [Query("RAW", "TEX", q.timestep) for q in queries], None)
+    except ParseError as e:
+        error = QueryError(e.message, e.start, e.end)
+        return QueryResult(query_raw, None, error)

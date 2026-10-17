@@ -4,6 +4,10 @@ export interface Api {
   get_program: { params: Record<string, never>; result: string };
   get_program_data: { params: Record<string, never>; result: ProgramData };
   get_explanation: { params: Record<string, never>; result: Explanation };
+  parse_query: {
+    params: { query_raw: string };
+    result: QueryResult;
+  };
   get_visualization: {
     params: { model: Model; t: number };
     result: string | null;
@@ -31,7 +35,7 @@ export type Edge = {
   target: string;
 };
 
-export type Query = {
+export type GraphQuery = {
   query_atom: string;
   type: string;
 };
@@ -39,7 +43,7 @@ export type Query = {
 export type Graph = {
   nodes: Node[];
   edges: Edge[];
-  query: Query[];
+  query: GraphQuery[];
 };
 
 export type Explanation = {
@@ -49,4 +53,22 @@ export type Explanation = {
   timeframe_full: [number, number];
   timeframe_explanation: [number, number];
   fluent_matrix: Record<string, ModelMembership[]>;
+};
+
+export type QueryResult = {
+  query_raw: string;
+  queries: Query[] | null;
+  error: QueryError | null;
+};
+
+export type QueryError = {
+  message: string;
+  start: number;
+  end: number;
+};
+
+export type Query = {
+  raw: string;
+  tex: string;
+  timestep: number | null;
 };

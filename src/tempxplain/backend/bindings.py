@@ -23,3 +23,30 @@ class ProgramData:
 
     files: list[str]
     viz_file: str | None = None
+
+
+@dataclass
+class Query:
+    """Parsed query from the input query string."""
+
+    raw: str
+    tex: str
+    timestep: int | None
+
+
+@dataclass
+class QueryError:
+    """Error parsing the input query."""
+
+    message: str
+    start: int
+    end: int
+
+
+@dataclass
+class QueryResult:
+    """Result of parsing a query."""
+
+    raw: str
+    queries: list[Query] | None
+    error: QueryError | None
