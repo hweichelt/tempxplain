@@ -13,6 +13,7 @@ readme = "README.md"
 dependencies = [
     "clingo==5.8",
     "asplain @ file:///${PROJECT_ROOT}/../../arbeit/asplain",
+    "tempql@git+https://github.com/hweichelt/tempql#egg=main",
     "websockets>=14",
 ]
 
