@@ -9,11 +9,28 @@ import type { Graph, Node as BackendNode } from "$lib/bindings";
 export type SectionData = { label: string };
 export type LayoutResult = { nodes: Node[]; edges: Edge[] };
 
-const NODE_WIDTH = 100;
-const NODE_HEIGHT = 40;
+const NODE_ATOM_WIDTH = 100;
+const NODE_ATOM_HEIGHT = 40;
+const NODE_RULE_WIDTH = 40;
+const NODE_RULE_HEIGHT = 40;
+const node_type_dimensions = new Map([
+  ["rule(disjunction)", [NODE_RULE_WIDTH, NODE_RULE_HEIGHT]],
+  ["rule(choice)", [NODE_RULE_WIDTH, NODE_RULE_HEIGHT]],
+  ["atom", [NODE_ATOM_WIDTH, NODE_ATOM_HEIGHT]],
+]);
+const DEFAULT_NODE_WIDTH = NODE_ATOM_WIDTH;
+const DEFAULT_NODE_HEIGHT = NODE_ATOM_HEIGHT;
+
 const SECTION_LABEL_HEIGHT = 32;
 const SECTION_PADDING = 16;
 const STATIC_SECTION_ID = "section:static";
+
+const node_type_labels = new Map([
+  ["rule(disjunction)", "rule_disjunction"],
+  ["rule(choice)", "rule_choice"],
+  ["atom", "atom"],
+]);
+const DEFAULT_NODE_TYPE = "default";
 
 const elk = new ELK();
 
@@ -54,8 +71,8 @@ function to_elk_graph(data: Graph): ElkNode {
       },
       children: nodes.map((node) => ({
         id: node.id,
-        width: NODE_WIDTH,
-        height: NODE_HEIGHT,
+        width: node_type_dimensions.get(node.type)?.[0] ?? DEFAULT_NODE_WIDTH,
+        height: node_type_dimensions.get(node.type)?.[1] ?? DEFAULT_NODE_HEIGHT,
       })),
     }),
   );
@@ -81,6 +98,12 @@ function to_elk_graph(data: Graph): ElkNode {
 }
 
 export async function layout_graph(data: Graph): Promise<LayoutResult> {
+  const types = new Map(
+    data.nodes.map((node) => [
+      node.id,
+      node_type_labels.get(node.type) ?? DEFAULT_NODE_TYPE,
+    ]),
+  );
   const labels = new Map(data.nodes.map((node) => [node.id, node.id]));
   const result = await elk.layout(to_elk_graph(data));
 
@@ -103,6 +126,7 @@ export async function layout_graph(data: Graph): Promise<LayoutResult> {
     for (const child of section.children ?? []) {
       nodes.push({
         id: child.id,
+        type: types.get(child.id),
         data: { label: labels.get(child.id) ?? child.id },
         // ELK child coordinates are relative to the parent, just like in SvelteFlow
         position: { x: child.x ?? 0, y: child.y ?? 0 },

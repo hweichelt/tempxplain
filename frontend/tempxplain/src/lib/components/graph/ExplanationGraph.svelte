@@ -17,6 +17,9 @@
     import FlowControl from "./FlowControl.svelte";
     import { layout_graph, section_id } from "./layout";
     import type { Graph } from "$lib/bindings";
+    import NodeRuleChoice from "$lib/components/graph/NodeRuleChoice.svelte";
+    import NodeRuleDisjunction from "$lib/components/graph/NodeRuleDisjunction.svelte";
+    import NodeAtom from "$lib/components/graph/NodeAtom.svelte";
 
     interface ExplanationGraphProps {
         graph: Graph;
@@ -24,7 +27,13 @@
     }
     let { graph, timestep }: ExplanationGraphProps = $props();
 
-    const nodeTypes: NodeTypes = { section: SectionNode };
+    const nodeTypes: NodeTypes = {
+        section: SectionNode,
+        rule_choice: NodeRuleChoice,
+        rule_disjunction: NodeRuleDisjunction,
+        atom: NodeAtom,
+        default: NodeAtom,
+    };
 
     let nodes = $state.raw<Node[]>([]);
     let edges = $state.raw<Edge[]>([]);

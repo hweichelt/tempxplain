@@ -4,6 +4,7 @@ The backend API.
 Functions are exposed by decorating them with `@rpc.method()`. Their return value has to be JSON serializable.
 """
 
+import json
 from typing import Literal
 
 from tempql.error import ParseError
@@ -68,7 +69,8 @@ def get_program_data(state: ServerState) -> ProgramData:
 def get_explanation(state: ServerState) -> Explanation:
     """Get details of the logic program."""
     exp = state.explanation
-    visualize_domain(state, Model.FOIL, 2)
+    with open("out/graph.json", "w") as f:
+        json.dump(exp.graph.json, f)
     return Explanation(
         program=exp.program,
         graph=exp.graph.json,
