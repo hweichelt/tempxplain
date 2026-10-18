@@ -37,7 +37,7 @@
         action: "Action",
         fluent: "Fluent",
     };
-    let atom_type_label: string = $derived(
+    let atom_type_label: string | undefined = $derived(
         data.properties.atom_type !== undefined
             ? atom_type_labels[data.properties.atom_type]
             : undefined,

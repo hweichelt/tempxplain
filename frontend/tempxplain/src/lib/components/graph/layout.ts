@@ -141,6 +141,7 @@ function is_inertia_edge(
   if (node_data.get(target_id)?.inertia ?? false) {
     return node_data.get(source_id)?.atom_type === "fluent";
   }
+  return false;
 }
 
 export async function layout_graph(data: Graph): Promise<LayoutResult> {
