@@ -33,6 +33,15 @@
         atom: "Atom",
     };
     let rule_type_label: string = $derived(rule_type_labels[variant]);
+    const atom_type_labels = {
+        action: "Action",
+        fluent: "Fluent",
+    };
+    let atom_type_label: string = $derived(
+        data.properties.atom_type !== undefined
+            ? atom_type_labels[data.properties.atom_type]
+            : undefined,
+    );
 </script>
 
 <div
@@ -72,7 +81,7 @@
                     class="grid grid-cols-[1fr_auto] text-xs text-muted-foreground px-2 items-center gap-1"
                 >
                     <div>Models</div>
-                    <div>
+                    <div class="justify-self-end">
                         <div class="flex flex-row gap-1">
                             {#if ["both", "ref"].includes(model_membership)}
                                 <div class="bg-ref h-3 w-3 rounded-xs"></div>
@@ -92,6 +101,10 @@
                     <div>Timestep</div>
                     <div class="justify-self-end">
                         {data.properties.time}
+                    </div>
+                    <div>Type</div>
+                    <div class="justify-self-end">
+                        {atom_type_label}
                     </div>
                 </div>
             </div>

@@ -30,7 +30,7 @@ export type Node = {
   time?: number;
   label?: string;
   title?: string;
-  atom_type?: string;
+  atom_type?: "action" | "fluent";
   first_order?: string;
 };
 
