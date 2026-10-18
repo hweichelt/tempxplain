@@ -23,6 +23,9 @@ log = get_logger("tempxplain.api")
 rpc: Registry[ServerState] = Registry()
 
 
+TEX_QUERY_MODEL = "\\mathbf{\\text{Foil}}"
+
+
 @rpc.method()
 def ping(_state: ServerState) -> Literal["pong"]:
     """Check that the backend is online and reachable."""
@@ -84,7 +87,9 @@ def parse_query(state: ServerState, query_raw: str) -> QueryResult:
     log.debug(f"Parsing query: {query_raw}")
     try:
         queries = parse(query_raw)
-        return QueryResult(query_raw, [Query("RAW", to_tex(q), q.timestep) for q in queries], None)
+        return QueryResult(
+            query_raw, [Query("RAW", to_tex(q, model=TEX_QUERY_MODEL), q.timestep) for q in queries], None
+        )
     except ParseError as e:
         error = QueryError(e.message, e.start, e.end)
         return QueryResult(query_raw, None, error)
