@@ -37,6 +37,8 @@
 
     let nodes = $state.raw<Node[]>([]);
     let edges = $state.raw<Edge[]>([]);
+    let selected: Node | undefined = $state();
+
     let flow_control = $state<FlowControl>();
 
     // updater variable for focusing the current timestep
@@ -83,6 +85,13 @@
             colorMode={mode.current}
             proOptions={{ hideAttribution: true }}
             oninit={() => initialized++}
+            nodesDraggable={false}
+            selectionKey={null}
+            multiSelectionKey={null}
+            selectionOnDrag={false}
+            onselectionchange={({ nodes: selected_nodes }) => {
+                selected = selected_nodes[0];
+            }}
         >
             <FlowControl bind:this={flow_control} />
             <Background variant={BackgroundVariant.Dots} />

@@ -2,7 +2,7 @@
     import type { NodeProps } from "./types";
     import NodeBase from "./NodeBase.svelte";
 
-    let { data }: NodeProps = $props();
+    let { data, selected }: NodeProps = $props();
 </script>
 
-<NodeBase {data} variant="atom" />
+<NodeBase {data} {selected} variant="atom" />

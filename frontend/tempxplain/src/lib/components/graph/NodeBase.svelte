@@ -8,8 +8,9 @@
         data: NodeData;
         variant:
             "rule_disjunction" | "rule_choice" | "rule_constraint" | "atom";
+        selected?: boolean;
     }
-    let { data, variant }: NodeBaseProps = $props();
+    let { data, variant, selected = false }: NodeBaseProps = $props();
 
     let model_membership: ModelMembership = $derived.by(() => {
         if (data.properties.models.length === 2) {
@@ -24,7 +25,8 @@
 </script>
 
 <div
-    class="variant-{variant} models-{model_membership} node h-full w-full nodrag"
+    class="variant-{variant} models-{model_membership} node h-full w-full"
+    class:selected
 >
     {#if variant !== "rule_constraint"}
         <Handle type="source" position={Position.Right} isConnectable={false} />
@@ -52,6 +54,10 @@
         justify-content: center;
         align-items: center;
         backdrop-filter: blur(1rem);
+    }
+    .node.selected {
+        outline: solid 0.1rem white;
+        opacity: 1 !important;
     }
     .node .label {
         font-size: 0.7rem;
