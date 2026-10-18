@@ -128,6 +128,21 @@ function free_node(
   };
 }
 
+function is_inertia_edge(
+  node_data: Map<string, BackendNode>,
+  source_id: string,
+  target_id: string,
+): boolean {
+  // Source node is inertia rule
+  if (node_data.get(source_id)?.inertia ?? false) {
+    return node_data.get(target_id)?.atom_type === "fluent";
+  }
+  // Target node is inertia rule
+  if (node_data.get(target_id)?.inertia ?? false) {
+    return node_data.get(source_id)?.atom_type === "fluent";
+  }
+}
+
 export async function layout_graph(data: Graph): Promise<LayoutResult> {
   const node_data = new Map(data.nodes.map((node) => [node.id, node]));
   const result = await elk.layout(to_elk_graph(data));
@@ -158,6 +173,7 @@ export async function layout_graph(data: Graph): Promise<LayoutResult> {
     id: edge_id(edge.source, edge.target),
     source: edge.source,
     target: edge.target,
+    animated: is_inertia_edge(node_data, edge.source, edge.target),
     markerEnd: { type: MarkerType.ArrowClosed },
   }));
 
