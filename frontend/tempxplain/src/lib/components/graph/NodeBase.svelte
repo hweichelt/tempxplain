@@ -4,7 +4,7 @@
     import type { ModelMembership } from "$lib/bindings";
     import * as Popover from "$lib/components/ui/popover/index.js";
     import bot from "../../../assets/bot.svg";
-    import { X } from "@lucide/svelte";
+    import { Asterisk, X } from "@lucide/svelte";
 
     interface NodeBaseProps {
         data: NodeData;
@@ -32,7 +32,7 @@
         rule_constraint: "Constraint",
         atom: "Atom",
     };
-    let rule_type_label: ModelMembership = $derived(rule_type_labels[variant]);
+    let rule_type_label: string = $derived(rule_type_labels[variant]);
 </script>
 
 <div
@@ -51,6 +51,11 @@
             class="indicator-constraint bg-destructive flex items-center justify-center"
         >
             <img src={bot} alt="F" class="invert h-1.5 w-1.5" />
+        </div>
+    {/if}
+    {#if variant === "rule_choice"}
+        <div class="indicator-choice flex items-center justify-center">
+            <Asterisk size={11.5} stroke-width={2.75} color="white" />
         </div>
     {/if}
     {#if variant === "atom"}
@@ -209,21 +214,6 @@
         );
         opacity: 0.5;
     }
-    .variant-rule_choice::after {
-        content: "*";
-        position: absolute;
-        top: -0.2rem;
-        right: -0.2rem;
-        height: 1rem;
-        width: 1rem;
-        border-radius: 50%;
-        background: var(--border-color);
-        font-size: 0.7rem;
-        text-align: center;
-    }
-    .variant-rule_choice.models-both::after {
-        animation: choice-both 3s linear infinite alternate-reverse;
-    }
     @keyframes choice-both {
         0% {
             background: var(--color-foil);
@@ -242,6 +232,20 @@
         padding-right: 0.15rem;
         right: -1rem;
         border-radius: 0 1rem 1rem 0;
+    }
+    .indicator-choice {
+        position: absolute;
+        top: -0.2rem;
+        right: -0.2rem;
+        height: 1rem;
+        width: 1rem;
+        border-radius: 50%;
+        background: var(--border-color);
+        font-size: 0.7rem;
+        text-align: center;
+    }
+    .models-both .indicator-choice {
+        animation: choice-both 3s linear infinite alternate-reverse;
     }
     .node .context {
         position: absolute;
