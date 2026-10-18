@@ -5,4 +5,8 @@
     let { data }: NodeProps = $props();
 </script>
 
-<NodeBase {data} variant="rule_disjunction" />
+{#if data.properties.constraint}
+    <NodeBase {data} variant="rule_constraint" />
+{:else}
+    <NodeBase {data} variant="rule_disjunction" />
+{/if}

@@ -26,6 +26,7 @@ export type Node = {
   id: string;
   models: Model[];
   programs: Model[];
+  constraint?: boolean;
   time?: number;
   label?: string;
   title?: string;

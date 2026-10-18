@@ -2,10 +2,12 @@
     import { Position, type NodeProps, Handle } from "@xyflow/svelte";
     import type { NodeData } from "./types";
     import type { ModelMembership } from "$lib/bindings";
+    import bot from "../../../assets/bot.svg";
 
     interface NodeBaseProps {
         data: NodeData;
-        variant: "rule_disjunction" | "rule_choice" | "atom";
+        variant:
+            "rule_disjunction" | "rule_choice" | "rule_constraint" | "atom";
     }
     let { data, variant }: NodeBaseProps = $props();
 
@@ -24,11 +26,20 @@
 <div
     class="variant-{variant} models-{model_membership} node h-full w-full nodrag"
 >
-    <Handle type="source" position={Position.Right} isConnectable={false} />
+    {#if variant !== "rule_constraint"}
+        <Handle type="source" position={Position.Right} isConnectable={false} />
+    {/if}
     <Handle type="target" position={Position.Left} isConnectable={false} />
     <div class="label">
         {data.label}
     </div>
+    {#if variant === "rule_constraint"}
+        <div
+            class="indicator-constraint bg-destructive flex items-center justify-center"
+        >
+            <img src={bot} alt="F" class="invert h-1.5 w-1.5" />
+        </div>
+    {/if}
 </div>
 
 <style>
@@ -72,8 +83,18 @@
         }
     }
     .variant-rule_disjunction,
-    .variant-rule_choice {
+    .variant-rule_choice,
+    .variant-rule_constraint {
         border-radius: 100rem;
+    }
+    .variant-rule_constraint {
+        border-color: var(--color-destructive);
+        background: color-mix(
+            in srgb,
+            var(--color-destructive) 35%,
+            transparent
+        );
+        opacity: 0.5;
     }
     .variant-rule_choice::after {
         content: "*";
@@ -100,5 +121,13 @@
     }
     .variant-atom {
         border-radius: 0.5rem;
+    }
+    .indicator-constraint {
+        position: absolute;
+        height: 1rem;
+        width: 1rem;
+        padding-right: 0.15rem;
+        right: -1rem;
+        border-radius: 0 1rem 1rem 0;
     }
 </style>
