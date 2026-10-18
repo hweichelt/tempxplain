@@ -2,7 +2,9 @@
     import { Position, type NodeProps, Handle } from "@xyflow/svelte";
     import type { NodeData } from "./types";
     import type { ModelMembership } from "$lib/bindings";
+    import * as Popover from "$lib/components/ui/popover/index.js";
     import bot from "../../../assets/bot.svg";
+    import { X } from "@lucide/svelte";
 
     interface NodeBaseProps {
         data: NodeData;
@@ -11,6 +13,8 @@
         selected?: boolean;
     }
     let { data, variant, selected = false }: NodeBaseProps = $props();
+
+    let context_menu_open = $derived(selected);
 
     let model_membership: ModelMembership = $derived.by(() => {
         if (data.properties.models.length === 2) {
@@ -22,6 +26,13 @@
         }
         return "none";
     });
+    const rule_type_labels = {
+        rule_disjunction: "Disjunction",
+        rule_choice: "Choice",
+        rule_constraint: "Constraint",
+        atom: "Atom",
+    };
+    let rule_type_label: ModelMembership = $derived(rule_type_labels[variant]);
 </script>
 
 <div
@@ -42,24 +53,120 @@
             <img src={bot} alt="F" class="invert h-1.5 w-1.5" />
         </div>
     {/if}
+    {#if variant === "atom"}
+        <div
+            class="context absolute w-47 bg-muted border rounded-md shadow-2xl flex flex-col"
+        >
+            <div class="p-2 flex flex-col gap-2">
+                <div
+                    class="bg-card text-xs h-6 flex items-center px-2 rounded-sm"
+                >
+                    {rule_type_label}
+                </div>
+                <div
+                    class="grid grid-cols-[1fr_auto] text-xs text-muted-foreground px-2 items-center gap-1"
+                >
+                    <div>Models</div>
+                    <div>
+                        <div class="flex flex-row gap-1">
+                            {#if ["both", "ref"].includes(model_membership)}
+                                <div class="bg-ref h-3 w-3 rounded-xs"></div>
+                            {/if}
+                            {#if ["both", "foil"].includes(model_membership)}
+                                <div class="bg-foil h-3 w-3 rounded-xs"></div>
+                            {/if}
+                            {#if model_membership === "none"}
+                                <div
+                                    class="border h-3 w-3 rounded-xs flex items-center justify-center"
+                                >
+                                    <X width={9} class="opacity-25" />
+                                </div>
+                            {/if}
+                        </div>
+                    </div>
+                    <div>Timestep</div>
+                    <div class="justify-self-end">
+                        {data.properties.time}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {:else}
+        <div
+            class="context absolute w-110 bg-muted border rounded-md shadow-2xl flex flex-col"
+        >
+            <div class="grid grid-cols-[3fr_4fr] border-b">
+                <div class="border-r p-2 flex flex-col gap-2">
+                    <div
+                        class="bg-card text-xs h-6 flex items-center px-2 rounded-sm"
+                    >
+                        {rule_type_label}
+                    </div>
+                    <div
+                        class="grid grid-cols-[1fr_auto] text-xs text-muted-foreground px-2 items-center gap-1"
+                    >
+                        <div>Models</div>
+                        <div>
+                            <div class="flex flex-row gap-1">
+                                {#if ["both", "ref"].includes(model_membership)}
+                                    <div
+                                        class="bg-ref h-3 w-3 rounded-xs"
+                                    ></div>
+                                {/if}
+                                {#if ["both", "foil"].includes(model_membership)}
+                                    <div
+                                        class="bg-foil h-3 w-3 rounded-xs"
+                                    ></div>
+                                {/if}
+                                {#if model_membership === "none"}
+                                    <div
+                                        class="border h-3 w-3 rounded-xs flex items-center justify-center"
+                                    >
+                                        <X width={9} class="opacity-25" />
+                                    </div>
+                                {/if}
+                            </div>
+                        </div>
+                        <div>Timestep</div>
+                        <div class="justify-self-end">
+                            {data.properties.time}
+                        </div>
+                    </div>
+                </div>
+                <div class="text-xs text-muted-foreground p-2 rounded-sm">
+                    {data.properties.label}
+                </div>
+            </div>
+            <div
+                class="codeblock text-[0.6rem] bg-card px-2 py-1 rounded-sm m-2 overflow-x-scroll"
+            >
+                <div class="text-nowrap">
+                    {data.properties.first_order}
+                </div>
+            </div>
+        </div>
+    {/if}
 </div>
 
 <style>
     .node {
         --border-color: light-dark(#c3c3c3, #3c3c3c);
-        font-family: "JetBrains Mono";
         background-color: var(--color-muted);
         border: solid 2px var(--color-border);
         display: flex;
         justify-content: center;
         align-items: center;
         backdrop-filter: blur(1rem);
+        outline: solid 0.1rem transparent;
+        transition-property: outline-color, opacity;
+        transition-duration: 200ms;
     }
     .node.selected {
-        outline: solid 0.1rem white;
+        outline-color: var(--color-foreground);
         opacity: 1 !important;
     }
     .node .label {
+        font-family: "JetBrains Mono";
         font-size: 0.7rem;
     }
     .node.models-foil {
@@ -135,5 +242,22 @@
         padding-right: 0.15rem;
         right: -1rem;
         border-radius: 0 1rem 1rem 0;
+    }
+    .node .context {
+        position: absolute;
+        bottom: 0;
+        transform: translateY(100%);
+        pointer-events: none;
+        opacity: 0;
+        transition-property: opacity, bottom;
+        transition-duration: 200ms;
+    }
+    .node.selected .context {
+        pointer-events: auto;
+        bottom: -0.5rem;
+        opacity: 1;
+    }
+    .node .context .codeblock {
+        font-family: "JetBrains Mono";
     }
 </style>

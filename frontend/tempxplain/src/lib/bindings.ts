@@ -31,6 +31,7 @@ export type Node = {
   label?: string;
   title?: string;
   atom_type?: string;
+  first_order?: string;
 };
 
 export type Edge = {
