@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { type NodeProps } from "@xyflow/svelte";
+    import type { NodeProps } from "./types";
     import NodeBase from "./NodeBase.svelte";
 
-    let { id, data }: NodeProps = $props();
+    let { data }: NodeProps = $props();
 </script>
 
-<NodeBase {id} {data} variant="rule_disjunction" />
+<NodeBase {data} variant="rule_disjunction" />

@@ -98,13 +98,16 @@ function to_elk_graph(data: Graph): ElkNode {
 }
 
 export async function layout_graph(data: Graph): Promise<LayoutResult> {
+  const node_data = new Map(data.nodes.map((node) => [node.id, node]));
   const types = new Map(
     data.nodes.map((node) => [
       node.id,
       node_type_labels.get(node.type) ?? DEFAULT_NODE_TYPE,
     ]),
   );
-  const labels = new Map(data.nodes.map((node) => [node.id, node.id]));
+  const labels = new Map(
+    data.nodes.map((node) => [node.id, node.title ?? node.id]),
+  );
   const result = await elk.layout(to_elk_graph(data));
 
   const nodes: Node[] = [];
@@ -127,7 +130,10 @@ export async function layout_graph(data: Graph): Promise<LayoutResult> {
       nodes.push({
         id: child.id,
         type: types.get(child.id),
-        data: { label: labels.get(child.id) ?? child.id },
+        data: {
+          label: labels.get(child.id) ?? child.id,
+          properties: node_data.get(child.id),
+        },
         // ELK child coordinates are relative to the parent, just like in SvelteFlow
         position: { x: child.x ?? 0, y: child.y ?? 0 },
         width: child.width,
