@@ -23,7 +23,7 @@ const DEFAULT_NODE_HEIGHT = NODE_ATOM_HEIGHT;
 
 const SECTION_LABEL_HEIGHT = 32;
 const SECTION_PADDING = 16;
-const STATIC_SECTION_ID = "section:static";
+const SECTION_ID_PREFIX = "section:";
 
 const node_type_labels = new Map([
   ["rule(disjunction)", "rule_disjunction"],
@@ -38,12 +38,8 @@ export function edge_id(source: string, target: string): string {
   return [source, target].join("-");
 }
 
-export function section_id(t: number | null): string {
-  return t === null ? STATIC_SECTION_ID : `section:${t}`;
-}
-
-function section_label(t: number | null): string {
-  return t === null ? "static" : `${t}`;
+export function section_id(t: number): string {
+  return `${SECTION_ID_PREFIX}${t}`;
 }
 
 function group_by_timepoint(
@@ -61,26 +57,39 @@ function group_by_timepoint(
   );
 }
 
+function to_elk_node(node: BackendNode): ElkNode {
+  return {
+    id: node.id,
+    width: node_type_dimensions.get(node.type)?.[0] ?? DEFAULT_NODE_WIDTH,
+    height: node_type_dimensions.get(node.type)?.[1] ?? DEFAULT_NODE_HEIGHT,
+  };
+}
+
 function to_elk_graph(data: Graph): ElkNode {
-  const children: ElkNode[] = group_by_timepoint(data.nodes).map(
-    ([t, nodes], partition) => ({
+  const children: ElkNode[] = [];
+  let partition = 0;
+  for (const [t, nodes] of group_by_timepoint(data.nodes)) {
+    const elk_nodes = nodes.map(to_elk_node);
+    if (t === null) {
+      children.push(...elk_nodes);
+      continue;
+    }
+    children.push({
       id: section_id(t),
       layoutOptions: {
-        "elk.partitioning.partition": String(partition),
+        "elk.partitioning.partition": String(partition++),
         "elk.padding": `[top=${SECTION_LABEL_HEIGHT + SECTION_PADDING},left=${SECTION_PADDING},bottom=${SECTION_PADDING},right=${SECTION_PADDING}]`,
       },
-      children: nodes.map((node) => ({
-        id: node.id,
-        width: node_type_dimensions.get(node.type)?.[0] ?? DEFAULT_NODE_WIDTH,
-        height: node_type_dimensions.get(node.type)?.[1] ?? DEFAULT_NODE_HEIGHT,
-      })),
-    }),
-  );
+      children: elk_nodes,
+    });
+  }
+
   const edges: ElkExtendedEdge[] = data.edges.map((edge) => ({
     id: edge_id(edge.source, edge.target),
     sources: [edge.source],
     targets: [edge.target],
   }));
+
   return {
     id: "root",
     layoutOptions: {
@@ -97,57 +106,55 @@ function to_elk_graph(data: Graph): ElkNode {
   };
 }
 
+function free_node(
+  node_data: Map<string, BackendNode>,
+  child: ElkNode,
+  parent?: ElkNode,
+): Node {
+  const properties = node_data.get(child.id);
+  return {
+    id: child.id,
+    type: node_type_labels.get(properties?.type ?? "") ?? DEFAULT_NODE_TYPE,
+    data: {
+      label: properties?.title ?? child.id,
+      properties,
+    },
+    position: { x: child.x ?? 0, y: child.y ?? 0 },
+    width: child.width,
+    height: child.height,
+    ...(parent ? { parentId: parent.id, extent: "parent" as const } : {}),
+    sourcePosition: Position.Right,
+    targetPosition: Position.Left,
+  };
+}
+
 export async function layout_graph(data: Graph): Promise<LayoutResult> {
   const node_data = new Map(data.nodes.map((node) => [node.id, node]));
-  const types = new Map(
-    data.nodes.map((node) => [
-      node.id,
-      node_type_labels.get(node.type) ?? DEFAULT_NODE_TYPE,
-    ]),
-  );
-  const labels = new Map(
-    data.nodes.map((node) => [node.id, node.title ?? node.id]),
-  );
   const result = await elk.layout(to_elk_graph(data));
 
   const nodes: Node[] = [];
-  for (const section of result.children ?? []) {
-    const t =
-      section.id === STATIC_SECTION_ID
-        ? null
-        : Number(section.id.slice("section:".length));
+  for (const child of result.children ?? []) {
+    if (node_data.has(child.id)) {
+      nodes.push(free_node(node_data, child));
+      continue;
+    }
+    const t = Number(child.id.slice(SECTION_ID_PREFIX.length));
     nodes.push({
-      id: section.id,
+      id: child.id,
       type: "section",
-      data: { label: section_label(t) } satisfies SectionData,
-      position: { x: section.x ?? 0, y: section.y ?? 0 },
-      width: section.width,
-      height: section.height,
+      data: { label: `${t}` } satisfies SectionData,
+      position: { x: child.x ?? 0, y: child.y ?? 0 },
+      width: child.width,
+      height: child.height,
       selectable: false,
       draggable: false,
     });
-    for (const child of section.children ?? []) {
-      nodes.push({
-        id: child.id,
-        type: types.get(child.id),
-        data: {
-          label: labels.get(child.id) ?? child.id,
-          properties: node_data.get(child.id),
-        },
-        // ELK child coordinates are relative to the parent, just like in SvelteFlow
-        position: { x: child.x ?? 0, y: child.y ?? 0 },
-        width: child.width,
-        height: child.height,
-        parentId: section.id,
-        extent: "parent",
-        sourcePosition: Position.Right,
-        targetPosition: Position.Left,
-      });
+    for (const grandchild of child.children ?? []) {
+      nodes.push(free_node(node_data, grandchild, child));
     }
   }
 
   const edges: Edge[] = data.edges.map((edge) => ({
-    // ...edge,
     id: edge_id(edge.source, edge.target),
     source: edge.source,
     target: edge.target,
