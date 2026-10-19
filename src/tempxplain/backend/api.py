@@ -75,8 +75,11 @@ def get_query(state: ServerState) -> str | None:
 @rpc.method()
 def next_foil(state: ServerState) -> ModelFoil | None:
     """Find the next foil model."""
-    state.next_explanation()
-    return get_foil(state)
+    foil_found = state.next_explanation()
+    if foil_found:
+        return get_foil(state)
+    # Return None if the foil models are exhausted
+    return None
 
 
 @rpc.method()

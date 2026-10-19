@@ -72,7 +72,7 @@ class ServerState:
         except StopIteration:
             log.error("Reference models exhausted")
 
-    def next_explanation(self) -> None:
+    def next_explanation(self) -> bool:
         """Find the next explanation."""
         if self._generator_foil is None:
             if self._current_reference_id is None:
@@ -95,8 +95,10 @@ class ServerState:
             )
             self._explanations[exp_id] = exp
             self._current_explanation_id = exp_id
+            return True
         except StopIteration:
             log.error("Foil models exhausted")
+            return False
 
 
 async def start_server(registry: Registry[Any], state: object, host: str, port: int) -> Server:

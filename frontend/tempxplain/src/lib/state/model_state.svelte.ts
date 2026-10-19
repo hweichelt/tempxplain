@@ -5,6 +5,7 @@ class ModelState {
   program_data: ProgramData | undefined = $state();
   reference: ModelReference | undefined = $state();
   explanation: ModelFoil | undefined = $state();
+  foils_exhausted: boolean = $state(false);
   is_loading: boolean = $state(false);
 
   constructor() {
@@ -15,6 +16,8 @@ class ModelState {
     const result = await backend.call("next_foil");
     if (result !== null) {
       this.explanation = result;
+    } else if (this.reference !== undefined) {
+      this.foils_exhausted = true;
     }
   }
 

@@ -86,17 +86,27 @@
 <Tooltip.Provider>
     <div id="content">
         <header class="border-b flex items-center justify-between">
-            <div class="px-6">
-                <img
-                    src={text_dark}
-                    alt="TempXplain"
-                    class="h-6 dark:invert not-dark:hidden"
-                />
-                <img
-                    src={text_light}
-                    alt="TempXplain"
-                    class="h-6 dark:invert dark:hidden"
-                />
+            <div class="flex flex-row gap-2 items-center">
+                <div class="px-6">
+                    <img
+                        src={text_dark}
+                        alt="TempXplain"
+                        class="h-6 dark:invert not-dark:hidden"
+                    />
+                    <img
+                        src={text_light}
+                        alt="TempXplain"
+                        class="h-6 dark:invert dark:hidden"
+                    />
+                </div>
+                {#if model_status === "both"}
+                    <Button
+                        disabled={model_state.foils_exhausted}
+                        onclick={() => model_state.next_foil()}
+                    >
+                        Next Explanation
+                    </Button>
+                {/if}
             </div>
             <div class="flex items-center gap-2 p-4">
                 <PlayButton
