@@ -13,7 +13,7 @@ from tempql.utils import to_tex
 from ..explain import MODEL_STRING_FOIL_TYPE, MODEL_STRING_REF, MODEL_STRING_REF_TYPE, Model
 from ..utils.logging import get_logger
 from ..visualize import visualize_domain
-from .bindings import Explanation, ProgramData, Query, QueryError, QueryResult
+from .bindings import ModelFoil, ModelReference, ProgramData, Query, QueryError, QueryResult
 from .rpc import Registry
 from .server import ServerState
 
@@ -39,8 +39,8 @@ def get_visualization(state: ServerState, model: MODEL_STRING_REF_TYPE | MODEL_S
     if state_model is None:
         log.warning(f"Cannot generate visualization for model {model} since there is none available")
         return None
-    t_start = state_model.interval_transformed[0]
-    t_end = state_model.interval_transformed[1]
+    t_start = state_model[1].interval_transformed[0]
+    t_end = state_model[1].interval_transformed[1]
     log.info(f"{t}, [{t_start},{t_end}]")
     if not (t_start <= t <= t_end):
         log.warning(f"Cannot generate visualization at t={t} since it is out of bounds [{t_start},{t_end}]")
@@ -67,13 +67,33 @@ def get_query(state: ServerState) -> str | None:
 
 
 @rpc.method()
-def get_explanation(state: ServerState) -> Explanation | None:
+def get_reference(state: ServerState) -> ModelReference | None:
+    """Get the reference model."""
+    match state.current_reference:
+        case None:
+            return None
+        case (ref_id, ref):
+            return ModelReference(
+                id=ref_id,
+                program=ref.program,
+                partitions={t: [str(a.symbol) for a in atoms] for t, atoms in ref.partitions_transformed.items()},
+                timeframe_full=ref.interval_transformed,
+                fluent_matrix={
+                    str(f): [m.value for m in membership] for f, membership in ref.fluent_matrix_transformed.items()
+                },
+            )
+
+
+@rpc.method()
+def get_foil(state: ServerState) -> ModelFoil | None:
     """Get details of the logic program."""
     match state.current_explanation:
         case None:
             return None
-        case exp:
-            return Explanation(
+        case ((ref_id, foil_id), exp):
+            return ModelFoil(
+                id=foil_id,
+                reference_id=ref_id,
                 program=exp.program,
                 graph=exp.graph.json,
                 partitions={t: [str(a.symbol) for a in atoms] for t, atoms in exp.partitions_transformed.items()},

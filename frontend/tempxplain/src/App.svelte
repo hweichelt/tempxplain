@@ -9,7 +9,7 @@
     import Timeline from "$lib/components/Timeline.svelte";
     import text_dark from "./assets/tempxplain_text.svg";
     import text_light from "./assets/tempxplain_text_light.svg";
-    import { program_state } from "$lib/state/program_state.svelte";
+    import { model_state } from "$lib/state/program_state.svelte";
     import ModelFilter from "$lib/components/ModelFilter.svelte";
     import ModelVisuals from "$lib/components/ModelVisuals.svelte";
     import type { ModelMembership } from "$lib/bindings";
@@ -26,11 +26,15 @@
         return () => backend.close();
     });
 
-    let timeframe = $derived(program_state.explanation?.timeframe_explanation);
+    let timeframe = $derived(model_state.explanation?.timeframe_explanation);
     let t_start = $derived(timeframe !== undefined ? timeframe[0] : 0);
     let t_end = $derived(timeframe !== undefined ? timeframe[1] : 0);
     let timestep = $derived(timeframe !== undefined ? timeframe[0] : 0);
-    let fluents = $derived(program_state.explanation?.fluent_matrix);
+    let fluents = $derived.by(() => {
+        if (model_state.explanation === undefined)
+            return model_state.reference?.fluent_matrix;
+        return model_state.explanation.fluent_matrix;
+    });
     let visualization = $state(true);
     let filter: ModelMembership = $state("both");
     let t_counter = $state(1);
@@ -132,11 +136,11 @@
                     <PanelLabel variant="light">EXPLANATION</PanelLabel>
                 </div>
                 <div>
-                    {#if program_state.explanation === undefined}
+                    {#if model_state.explanation === undefined}
                         <Skeleton class="w-full h-full" />
                     {:else}
                         <ExplanationGraph
-                            graph={program_state.explanation.graph}
+                            graph={model_state.explanation.graph}
                             {timestep}
                         />
                     {/if}

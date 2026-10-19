@@ -45,18 +45,18 @@ class ServerState:
         self.next_reference()
 
     @property
-    def current_reference(self) -> Reference | None:
+    def current_reference(self) -> tuple[int, Reference] | None:
         """Return the current reference model ID."""
         if self._current_reference_id is None:
             return None
-        return self._references[self._current_reference_id]
+        return self._current_reference_id, self._references[self._current_reference_id]
 
     @property
-    def current_explanation(self) -> Explanation | None:
+    def current_explanation(self) -> tuple[tuple[int, int], Explanation] | None:
         """Return the current reference model ID."""
         if self._current_explanation_id is None:
             return None
-        return self._explanations[self._current_explanation_id]
+        return self._current_explanation_id, self._explanations[self._current_explanation_id]
 
     def get_explanation(self, ref_id: int, foil_id: int) -> Explanation:
         """Explain the provided reference model with it's proivded foil counterpart."""

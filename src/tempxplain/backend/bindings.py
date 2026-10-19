@@ -6,18 +6,6 @@ from asplain.llm.utils.graph import JsonGraph
 
 
 @dataclass
-class Explanation:
-    """Details of the logic program."""
-
-    program: str
-    graph: JsonGraph
-    partitions: dict[int, list[str]]
-    timeframe_full: tuple[int, int]
-    timeframe_explanation: tuple[int, int]
-    fluent_matrix: dict[str, list[str]]
-
-
-@dataclass
 class ProgramData:
     """Data of the input logic programs."""
 
@@ -57,7 +45,9 @@ class ModelReference:
     """A reference model of the explanation."""
 
     id: int
-    atoms: list[str]
+    program: str
+    partitions: dict[int, list[str]]
+    timeframe_full: tuple[int, int]
     fluent_matrix: dict[str, list[str]]
 
 
@@ -67,6 +57,9 @@ class ModelFoil:
 
     id: int
     reference_id: int
-    atoms: list[str]
+    program: str
+    graph: JsonGraph
+    partitions: dict[int, list[str]]
+    timeframe_full: tuple[int, int]
+    timeframe_explanation: tuple[int, int]
     fluent_matrix: dict[str, list[str]]
-    explanation: Explanation

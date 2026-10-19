@@ -1,9 +1,13 @@
 export interface Api {
   ping: { params: Record<string, never>; result: "pong" };
-  set_program: { params: { program: string }; result: null };
-  get_program: { params: Record<string, never>; result: string };
+  get_query: { params: Record<string, never>; result: string | null };
+  set_query: { params: { query: string }; result: null };
   get_program_data: { params: Record<string, never>; result: ProgramData };
-  get_explanation: { params: Record<string, never>; result: Explanation };
+  get_reference: {
+    params: Record<string, never>;
+    result: ModelReference | null;
+  };
+  get_foil: { params: Record<string, never>; result: ModelFoil | null };
   parse_query: {
     params: { query_raw: string };
     result: QueryResult;
@@ -52,7 +56,17 @@ export type Graph = {
   query: GraphQuery[];
 };
 
-export type Explanation = {
+export type ModelReference = {
+  id: number;
+  program: string;
+  partitions: Record<number, string[]>;
+  timeframe_full: [number, number];
+  fluent_matrix: Record<string, ModelMembership[]>;
+};
+
+export type ModelFoil = {
+  id: number;
+  reference_id: number;
   program: string;
   graph: Graph;
   partitions: Record<number, string[]>;
