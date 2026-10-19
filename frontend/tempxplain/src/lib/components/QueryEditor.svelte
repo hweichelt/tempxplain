@@ -79,6 +79,21 @@
             symbol: "S[<span></span>,<span></span>]",
         },
     ];
+    // mount if query is defined
+    $effect(() => {
+        if (
+            query_state.raw.length > 0 &&
+            !model_state.is_loading &&
+            model_state.explanation === undefined
+        )
+            dialog_open = true;
+    });
+    // unmount
+    $effect(() => {
+        return () => {
+            dialog_open = false;
+        };
+    });
 </script>
 
 <Dialog.Root

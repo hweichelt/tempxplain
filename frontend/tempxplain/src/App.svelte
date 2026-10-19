@@ -52,7 +52,7 @@
     let t_conter_poll = $state(250);
     let t_counter_active = $state(false);
     let t_counter_running = $state(false);
-    let query_dialog_open = $derived(query_state.open_dialog);
+    let query_dialog_open = $state(false);
 
     let keyboard_controls_blocked = $derived(
         t_counter_running || query_dialog_open,
