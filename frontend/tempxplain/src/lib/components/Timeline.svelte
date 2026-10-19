@@ -45,7 +45,15 @@
     }
 </script>
 
-<div class="grid grid-rows-[auto_auto_minmax(0,1fr)] h-full">
+<div class="relative grid grid-rows-[auto_auto_minmax(0,1fr)] h-full">
+    <div class="absolute top-0 bottom-0 left-36 right-0 overflow-hidden">
+        <div
+            id="current"
+            class="absolute border-2 border-white border-t-transparent border-b-transparent"
+            style:--step-size={`${timestep_width}px`}
+            style:--step={timestep}
+        ></div>
+    </div>
     <div
         class="grid shadow-lg z-30"
         style:grid-template-columns={grid_cols_steps}
@@ -90,14 +98,6 @@
                 </div>
             {/each}
         {/each}
-        <div class="absolute top-0 bottom-0 left-36 right-0 overflow-hidden">
-            <div
-                id="current"
-                class="absolute border-2 border-white border-t-transparent border-b-transparent"
-                style:--step-size={`${timestep_width}px`}
-                style:--step={timestep}
-            ></div>
-        </div>
     </div>
     <div></div>
 </div>
