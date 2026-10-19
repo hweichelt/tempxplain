@@ -1,9 +1,12 @@
 <script lang="ts">
     import type { ModelMembership } from "$lib/bindings";
+    import { query_state } from "$lib/state/query_state.svelte";
     import ExternalLink from "./ExternalLink.svelte";
     import Hint from "./Hint.svelte";
+    import HoverCard from "./HoverCard.svelte";
     import InlineCode from "./InlineCode.svelte";
     import PanelLabel from "./PanelLabel.svelte";
+    import Queries from "./Queries.svelte";
     import Visualization from "./Visualization.svelte";
 
     interface ModelVisualsProps {
@@ -111,6 +114,17 @@
                     </div>
                 </div>
             </Hint>
+            <div class="flex-1 flex justify-end">
+                <HoverCard class="w-150">
+                    {#snippet trigger()}
+                        <PanelLabel>QUERIES</PanelLabel>
+                    {/snippet}
+                    <Queries
+                        parsed_queries={query_state.parsed}
+                        correct={true}
+                    />
+                </HoverCard>
+            </div>
         </div>
         <div class="viz z-50">
             <Visualization
