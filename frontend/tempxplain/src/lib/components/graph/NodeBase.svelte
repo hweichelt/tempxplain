@@ -154,6 +154,18 @@
                         <div class="justify-self-end">
                             {data.properties.time}
                         </div>
+                        {#if data.properties.addable}
+                            <div
+                                class="col-span-2 rounded-sm bg-foreground/10 grid grid-cols-[auto_1fr] px-1 py-0.5 gap-1.5 items-center text-foreground mt-1"
+                            >
+                                <Plus
+                                    color="var(--color-foreground)"
+                                    size={12}
+                                    stroke-width={3}
+                                />
+                                <div>Added in Foil</div>
+                            </div>
+                        {/if}
                     </div>
                 </div>
                 <div class="text-xs text-muted-foreground p-2 rounded-sm">
