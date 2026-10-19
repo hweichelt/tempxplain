@@ -183,7 +183,12 @@
                 </div>
             </div>
             <div id="visualization" class="border-l">
-                <ModelVisuals bind:filter bind:timestep bind:visualization />
+                <ModelVisuals
+                    bind:filter
+                    bind:timestep
+                    bind:visualization
+                    {model_status}
+                />
             </div>
             <div id="timeline" class="border-t">
                 {#if timeframe !== undefined && fluents !== undefined}
