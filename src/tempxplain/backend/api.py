@@ -55,6 +55,18 @@ def get_program_data(state: ServerState) -> ProgramData:
 
 
 @rpc.method()
+def set_query(state: ServerState, query: str) -> None:
+    """Set the query string."""
+    state._query = query
+
+
+@rpc.method()
+def get_query(state: ServerState) -> str | None:
+    """Get the query string."""
+    return state._query
+
+
+@rpc.method()
 def get_explanation(state: ServerState) -> Explanation | None:
     """Get details of the logic program."""
     match state.current_explanation:
