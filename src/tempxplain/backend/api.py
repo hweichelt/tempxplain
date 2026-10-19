@@ -10,7 +10,7 @@ from tempql.error import ParseError
 from tempql.parser import parse
 from tempql.utils import to_tex
 
-from ..explain import MODEL_STRING_FOIL_TYPE, MODEL_STRING_REF_TYPE, Explanation, Model, ModelGraph
+from ..explain import MODEL_STRING_FOIL_TYPE, MODEL_STRING_REF_TYPE, Model
 from ..utils.logging import get_logger
 from ..visualize import visualize_domain
 from .bindings import ModelFoil, ModelReference, ProgramData, Query, QueryError, QueryResult
@@ -120,7 +120,7 @@ def get_foil(state: ServerState) -> ModelFoil | None:
 
 
 @rpc.method()
-def parse_query(state: ServerState, query_raw: str) -> QueryResult:
+def parse_query(_state: ServerState, query_raw: str) -> QueryResult:
     """Get data for the input programs."""
     log.debug(f"Parsing query: {query_raw}")
     try:

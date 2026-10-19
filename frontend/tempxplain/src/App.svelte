@@ -4,7 +4,6 @@
     import ModeToggle from "$lib/components/ModeToggle.svelte";
     import ConnectionIndicator from "$lib/components/ConnectionIndicator.svelte";
     import { backend } from "$lib/backend.svelte";
-    import Badge from "$lib/components/ui/badge/badge.svelte";
     import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
     import Timeline from "$lib/components/Timeline.svelte";
     import text_dark from "./assets/tempxplain_text.svg";
@@ -245,8 +244,5 @@
     }
     #timeline {
         grid-area: tim;
-    }
-    .logo-bg {
-        background: light-dark(#cfd8dc, #37474f);
     }
 </style>
