@@ -119,7 +119,7 @@ class Atom:
 
 
 @dataclass(frozen=True)
-class Reference:
+class ModelGraph:
     """Representation of an explanation model."""
 
     symbols: set[Symbol]
@@ -131,12 +131,12 @@ class Reference:
 
     @cached_property
     def atoms(self) -> set[Atom]:
-        """The atoms of the untransformed explanation graph with assigned model memberships."""
-        return Explanation._explanation_symbols_to_atoms(self.symbols)
+        """The atoms of the explanation graph with assigned model memberships."""
+        return ModelGraph._explanation_symbols_to_atoms(self.symbols)
 
     @cached_property
     def atoms_static(self) -> set[Atom]:
-        """The static atoms of the untransformed explanation graph."""
+        """The static atoms of the explanation graph."""
         return {a for a in self.atoms if a.time is None}
 
     @cached_property
@@ -146,7 +146,7 @@ class Reference:
 
     @cached_property
     def fluents(self) -> set[Atom]:
-        """The fluent atoms of the transformed explanation graph."""
+        """The fluent atoms of the explanation graph."""
         return {a for a in self.atoms_timed if a.is_fluent}
 
     @cached_property
@@ -170,12 +170,12 @@ class Reference:
 
     @cached_property
     def fluent_matrix(self) -> dict[Symbol, list[ModelMembership]]:
-        """`Symbol` <-> `ModelMembership` matrix for fluents in the transformed explanation graph."""
+        """`Symbol` <-> `ModelMembership` matrix for fluents in the explanation graph."""
         return self._fluent_matrix(self.fluents, self.length)
 
     @staticmethod
     def _fluent_matrix(fluents: set[Atom], length: int) -> dict[Symbol, list[ModelMembership]]:
-        """`Symbol` <-> `ModelMembership` matrix for fluents in the transformed explanation graph."""
+        """`Symbol` <-> `ModelMembership` matrix for fluents in the explanation graph."""
         fluent_bases = {a.base for a in fluents}
         matrix = {a: [ModelMembership.NONE] * length for a in fluent_bases}
         for atom in fluents:
@@ -213,77 +213,24 @@ class Reference:
 
 
 @dataclass(frozen=True)
-class Explanation(Reference):
-    """Representation of an explanation."""
+class Explanation:
+    """Representation of an explanation graph."""
 
-    @cached_property
-    def symbols_transformed(self) -> set[Symbol]:
-        """The symbols of the explanation graph after temporal transformation."""
-        return set(transform_temporal(self.symbols))
+    full: ModelGraph
+    transformed: ModelGraph
 
-    @cached_property
-    def program(self) -> str:
-        """The explanation graph as a program string."""
-        return to_program(self.symbols_transformed)
+    @classmethod
+    def from_symbols(cls, symbols: set[Symbol]) -> "Explanation":
+        """Create an explanation graph from a set of symbols."""
+        return cls(
+            ModelGraph(set(symbols)),
+            ModelGraph(set(transform_temporal(symbols))),
+        )
 
     @cached_property
     def graph(self) -> TemporalExplanationGraph:
         """The explanation graph."""
-        return TemporalExplanationGraph.from_symbols(self.symbols_transformed)
-
-    @cached_property
-    def atoms_transformed(self) -> set[Atom]:
-        """The atoms of the transformed explanation graph with assigned model memberships."""
-        return Explanation._explanation_symbols_to_atoms(self.symbols_transformed)
-
-    @cached_property
-    def atoms_transformed_timed(self) -> set[Atom]:
-        """The timed atoms of the transformed explanation graph."""
-        return {a for a in self.atoms_transformed if a.time is not None}
-
-    @cached_property
-    def fluents_transformed(self) -> set[Atom]:
-        """The fluent atoms of the transformed explanation graph."""
-        return {a for a in self.atoms_transformed_timed if a.is_fluent}
-
-    @cached_property
-    def actions_transformed(self) -> set[Atom]:
-        """The action atoms of the transformed explanation graph."""
-        return {a for a in self.atoms_transformed_timed if a.is_action}
-
-    @cached_property
-    def partitions_transformed(self) -> dict[int, set[Atom]]:
-        """The partitions of the transformed explanation graph, indexed by timepoint."""
-        partitions: dict[int, set[Atom]] = {}
-        for atom in self.atoms_transformed_timed:
-            if (timepoint := atom.time) is not None:
-                partitions.setdefault(timepoint, set()).add(atom)
-        return partitions
-
-    @cached_property
-    def interval_transformed(self) -> tuple[int, int]:
-        """The time interval of the transformed explanation graph as a tuple (start, end)."""
-        return min(self.partitions_transformed), max(self.partitions_transformed)
-
-    @cached_property
-    def length_transformed(self) -> int:
-        """The length of the transformed explanation graph (the number of timepoints)."""
-        return len(self.partitions_transformed)
-
-    @cached_property
-    def fluent_matrix_transformed(self) -> dict[Symbol, list[ModelMembership]]:
-        """`Symbol` <-> `ModelMembership` matrix for fluents in the transformed explanation graph."""
-        return self._fluent_matrix(self.fluents_transformed, self.length_transformed)
-
-    def get_model_state_at(self, model: Model, t: int) -> set[Symbol]:
-        """Get the state of the domain world at given time `t` in the model `model`."""
-        if t not in range(self.interval_transformed[0], self.interval_transformed[1] + 1):
-            raise ValueError(f"Time {t} is out of range for the explanation interval {self.interval_transformed}")
-        atoms_model_partition_t = {a.base for a in self.partitions_transformed[t] if a.membership.has(model)}
-        atoms_static = {a.base for a in self.atoms_static}
-        atoms_t = atoms_model_partition_t.union(atoms_static)
-        log.info(f"Model state at t={t}: {[str(a) for a in atoms_t]}")
-        return atoms_t
+        return TemporalExplanationGraph.from_symbols(self.transformed.symbols)
 
 
 def parse_model(model_prg: str) -> list[str] | None:
@@ -322,7 +269,7 @@ def navigate_reference_models(
     constants: dict[str, str],
     assumptions: set[tuple[str, bool]],
     model_program: str,
-) -> Generator[Reference]:
+) -> Generator[ModelGraph]:
     """Yield reference models for the given program."""
     model_symbols = parse_model(model_program)
     control = clingo.Control([str(NUMBER_OF_REFERENCE_MODELS), "--warn=none"])
@@ -338,7 +285,7 @@ def navigate_reference_models(
         found_any = False
         for model in sh:
             found_any = True
-            yield Reference(set(model.symbols(atoms=True)))
+            yield ModelGraph(set(model.symbols(atoms=True)))
         if not found_any:
             return None
 
@@ -363,7 +310,7 @@ def find_foil(
             if not model.optimality_proven:
                 log.info(f"Skipping non-optimal foil model {model.number}")
                 continue
-            yield Explanation(set(model.symbols(shown=True)))
+            yield Explanation.from_symbols(set(model.symbols(shown=True)))
         log.warning("No foil found.")
 
 
@@ -371,7 +318,7 @@ def navigate_foil_models(
     files: list[str],
     constants: dict[str, str],
     assumptions: set[tuple[str, bool]],
-    reference_model: Reference | None,
+    reference_model: ModelGraph | None,
     query: str,
 ) -> Generator[Explanation]:
     """Compute the explanation graph for a given program with query."""

@@ -7,7 +7,7 @@ from typing import Any, cast
 from websockets.asyncio.server import Server, ServerConnection, serve
 from websockets.exceptions import ConnectionClosed
 
-from ..explain import Explanation, Reference, navigate_foil_models, navigate_reference_models
+from ..explain import Explanation, ModelGraph, navigate_foil_models, navigate_reference_models
 from ..utils.logging import get_logger
 from .bindings import ProgramData
 from .rpc import Registry
@@ -32,10 +32,10 @@ class ServerState:
         self._query: str | None = query
         self._current_reference_id: int | None = None
         self._current_explanation_id: tuple[int, int] | None = None
-        self._references: dict[int, Reference] = {}
+        self._references: dict[int, ModelGraph] = {}
         self._explanations: dict[tuple[int, int], Explanation] = {}
         self._generator_foil: Generator[Explanation] | None = None
-        self._generator_reference: Generator[Reference] = navigate_reference_models(
+        self._generator_reference: Generator[ModelGraph] = navigate_reference_models(
             files=self.program_data.files,
             constants={},
             assumptions=set(),
@@ -45,7 +45,7 @@ class ServerState:
         self.next_reference()
 
     @property
-    def current_reference(self) -> tuple[int, Reference] | None:
+    def current_reference(self) -> tuple[int, ModelGraph] | None:
         """Return the current reference model with its ID."""
         if self._current_reference_id is None:
             return None

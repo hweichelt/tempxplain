@@ -12,7 +12,7 @@ from tempxplain.utils.logging import get_logger
 from tempxplain.utils.symbols import to_program
 
 from .backend.server import ServerState
-from .explain import Explanation, Model, Reference
+from .explain import Model, ModelGraph
 
 __all__ = ["visualize_domain"]
 
@@ -23,16 +23,15 @@ SVG_PREAMBLE = re.compile(r"^.*?(?=<svg)", re.DOTALL)
 log = get_logger("tempxplain.visualize")
 
 
-def visualize_domain(state: ServerState, model: Reference | Explanation, t: int, save: bool = True) -> str | None:
+def visualize_domain(state: ServerState, graph: ModelGraph, model: Model, t: int, save: bool = True) -> str | None:
     """
     Visualize the domain of the model at time step `t` with clingraph.
     """
-    model_type = Model.REFERENCE if isinstance(model, Reference) else Model.FOIL
     if state.program_data.viz_file is None:
         log.warning("No visualization file was provided, so nothing was rendered.")
         return None
     ctl = Control(["1", "--warn=none"])  # limit to 1 model (no warnings)
-    ctl.add("base", [], to_program(model.get_model_state_at(model_type, t)))
+    ctl.add("base", [], to_program(graph.get_model_state_at(model, t)))
     ctl.load(state.program_data.viz_file)
     ctl.ground([("base", [])], context=ClingraphContext())
     fb = Factbase()
@@ -40,11 +39,11 @@ def visualize_domain(state: ServerState, model: Reference | Explanation, t: int,
 
     graphs: dict[str, Digraph] = compute_graphs(fb, graphviz_type="directed")
     # Get first (and only) graph
-    name, graph = next(iter(graphs.items()))
-    log.debug(f"Rendering graph '{name}' for model {model_type.value} at t={t}")
-    svg = graph.pipe(format=FORMAT, engine=ENGINE)
+    name, g = next(iter(graphs.items()))
+    log.debug(f"Rendering graph '{name}' for model {model.value} at t={t}")
+    svg = g.pipe(format=FORMAT, engine=ENGINE)
     if save:
-        log.debug(f"Saving graph '{name}' for model {model_type.value} at t={t}")
-        with open(f"out/{model_type.value}-{t}.{FORMAT}", "wb") as f:
+        log.debug(f"Saving graph '{name}' for model {model.value} at t={t}")
+        with open(f"out/{model.value}-{t}.{FORMAT}", "wb") as f:
             f.write(svg)
     return SVG_PREAMBLE.sub("", svg.decode("utf-8"), count=1)

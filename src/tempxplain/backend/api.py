@@ -10,7 +10,7 @@ from tempql.error import ParseError
 from tempql.parser import parse
 from tempql.utils import to_tex
 
-from ..explain import MODEL_STRING_FOIL_TYPE, MODEL_STRING_REF, MODEL_STRING_REF_TYPE, Model
+from ..explain import MODEL_STRING_FOIL_TYPE, MODEL_STRING_REF_TYPE, Explanation, Model, ModelGraph
 from ..utils.logging import get_logger
 from ..visualize import visualize_domain
 from .bindings import ModelFoil, ModelReference, ProgramData, Query, QueryError, QueryResult
@@ -35,22 +35,22 @@ def ping(_state: ServerState) -> Literal["pong"]:
 @rpc.method()
 def get_visualization(state: ServerState, model: MODEL_STRING_REF_TYPE | MODEL_STRING_FOIL_TYPE, t: int) -> str | None:
     """Get the domain visualization of the specified model at time `t` as svg."""
-    match Model(model):
+    m = Model(model)
+    match m:
         case Model.REFERENCE:
-            current = state.current_reference
+            graph = state.current_reference[1] if state.current_reference else None
         case Model.FOIL:
-            current = state.current_explanation
-    if current is None:
+            graph = state.current_explanation[1].full if state.current_explanation else None
+    if graph is None:
         log.warning(f"Cannot generate visualization for model {model} since there is none available")
         return None
-    current = current[1]
-    t_start = current.interval[0]
-    t_end = current.interval[1]
+    t_start = graph.interval[0]
+    t_end = graph.interval[1]
     log.info(f"{t}, [{t_start},{t_end}]")
     if not (t_start <= t <= t_end):
         log.warning(f"Cannot generate visualization at t={t} since it is out of bounds [{t_start},{t_end}]")
         return None
-    return visualize_domain(state, current, t)
+    return visualize_domain(state, graph, m, t)
 
 
 @rpc.method()
@@ -108,13 +108,13 @@ def get_foil(state: ServerState) -> ModelFoil | None:
             return ModelFoil(
                 id=foil_id,
                 reference_id=ref_id,
-                program=exp.program,
+                program=exp.transformed.program,
                 graph=exp.graph.json,
-                partitions={t: [str(a.symbol) for a in atoms] for t, atoms in exp.partitions_transformed.items()},
-                timeframe_full=exp.interval_transformed,
-                timeframe_explanation=exp.interval_transformed,
+                partitions={t: [str(a.symbol) for a in atoms] for t, atoms in exp.transformed.partitions.items()},
+                timeframe_full=exp.full.interval,
+                timeframe_explanation=exp.transformed.interval,
                 fluent_matrix={
-                    str(f): [m.value for m in membership] for f, membership in exp.fluent_matrix_transformed.items()
+                    str(f): [m.value for m in membership] for f, membership in exp.transformed.fluent_matrix.items()
                 },
             )
 
