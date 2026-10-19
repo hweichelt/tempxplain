@@ -46,14 +46,14 @@ class ServerState:
 
     @property
     def current_reference(self) -> tuple[int, Reference] | None:
-        """Return the current reference model ID."""
+        """Return the current reference model with its ID."""
         if self._current_reference_id is None:
             return None
         return self._current_reference_id, self._references[self._current_reference_id]
 
     @property
     def current_explanation(self) -> tuple[tuple[int, int], Explanation] | None:
-        """Return the current reference model ID."""
+        """Return the current explanation with its ID."""
         if self._current_explanation_id is None:
             return None
         return self._current_explanation_id, self._explanations[self._current_explanation_id]

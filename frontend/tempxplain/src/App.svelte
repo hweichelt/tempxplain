@@ -9,7 +9,7 @@
     import Timeline from "$lib/components/Timeline.svelte";
     import text_dark from "./assets/tempxplain_text.svg";
     import text_light from "./assets/tempxplain_text_light.svg";
-    import { model_state } from "$lib/state/program_state.svelte";
+    import { model_state } from "$lib/state/model_state.svelte";
     import ModelFilter from "$lib/components/ModelFilter.svelte";
     import ModelVisuals from "$lib/components/ModelVisuals.svelte";
     import type { ModelMembership } from "$lib/bindings";
@@ -20,13 +20,23 @@
     import PlayButton from "$lib/components/PlayButton.svelte";
     import ExplanationGraph from "$lib/components/graph/ExplanationGraph.svelte";
     import QueryEditor from "$lib/components/QueryEditor.svelte";
+    import Button from "$lib/components/ui/button/button.svelte";
 
     $effect(() => {
         backend.connect().catch(() => {});
         return () => backend.close();
     });
 
-    let timeframe = $derived(model_state.explanation?.timeframe_explanation);
+    let model_status: ModelMembership = $derived.by(() => {
+        if (model_state.explanation !== undefined) return "both";
+        if (model_state.reference !== undefined) return "ref";
+        return "none";
+    });
+    let timeframe = $derived.by(() => {
+        if (model_state.explanation === undefined)
+            return model_state.reference?.timeframe_full;
+        return model_state.explanation.timeframe_explanation;
+    });
     let t_start = $derived(timeframe !== undefined ? timeframe[0] : 0);
     let t_end = $derived(timeframe !== undefined ? timeframe[1] : 0);
     let timestep = $derived(timeframe !== undefined ? timeframe[0] : 0);
@@ -36,7 +46,7 @@
         return model_state.explanation.fluent_matrix;
     });
     let visualization = $state(true);
-    let filter: ModelMembership = $state("both");
+    let filter: ModelMembership = $state("ref");
     let t_counter = $state(1);
     let t_counter_seconds = $state(2);
     let t_conter_poll = $state(250);
@@ -87,7 +97,6 @@
                     class="h-6 dark:invert dark:hidden"
                 />
             </div>
-            <QueryEditor bind:dialog_open={query_dialog_open} />
             <div class="flex items-center gap-2 p-4">
                 <PlayButton
                     {t_start}
@@ -122,7 +131,7 @@
                     disabled={timestep === t_end || t_counter_running}
                     ><ChevronRight /></TooltipButton
                 >
-                <ModelFilter bind:filter />
+                <ModelFilter bind:filter {model_status} />
                 <ConnectionIndicator />
                 <ModeToggle />
             </div>
@@ -137,7 +146,33 @@
                 </div>
                 <div>
                     {#if model_state.explanation === undefined}
-                        <Skeleton class="w-full h-full" />
+                        <div
+                            class="w-full h-full border rounded-md flex flex-col items-center justify-center"
+                        >
+                            <div
+                                class="bg-card rounded-md border flex flex-col shadow-lg"
+                            >
+                                <div class="text-lg p-4">
+                                    Compute an Explanation
+                                </div>
+                                <div
+                                    class="max-w-100 text-sm text-muted-foreground px-4 pb-4"
+                                >
+                                    To compute an explanation, you have to first
+                                    compose a query that specifies what you want
+                                    to be explained by the explanation foil. To
+                                    enter your query and start the explanation
+                                    search, press the button below.
+                                </div>
+                                <div
+                                    class="border-t p-4 flex flex-row justify-end"
+                                >
+                                    <QueryEditor
+                                        bind:dialog_open={query_dialog_open}
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     {:else}
                         <ExplanationGraph
                             graph={model_state.explanation.graph}

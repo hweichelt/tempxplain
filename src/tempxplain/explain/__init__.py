@@ -28,6 +28,7 @@ log = get_logger("server.explain")
 enable_python()
 
 DEFAULT_COST_ENCODING = Path(__file__).parent.parent / "encodings" / "cost" / "default.lp"
+NUMBER_OF_REFERENCE_MODELS = 0
 NUMBER_OF_EXPLANATIONS = 0
 MODEL_STRING_REF_TYPE = Literal["ref"]
 MODEL_STRING_REF: Literal["ref"] = get_args(MODEL_STRING_REF_TYPE)[0]
@@ -124,6 +125,98 @@ class Reference:
     symbols: set[Symbol]
 
     @cached_property
+    def program(self) -> str:
+        """The explanation graph as a program string."""
+        return to_program(self.symbols)
+
+    @cached_property
+    def atoms(self) -> set[Atom]:
+        """The atoms of the untransformed explanation graph with assigned model memberships."""
+        return Explanation._explanation_symbols_to_atoms(self.symbols)
+
+    @cached_property
+    def atoms_static(self) -> set[Atom]:
+        """The static atoms of the untransformed explanation graph."""
+        return {a for a in self.atoms if a.time is None}
+
+    @cached_property
+    def atoms_timed(self) -> set[Atom]:
+        """The timed atoms of the explanation graph."""
+        return {a for a in self.atoms if a.time is not None}
+
+    @cached_property
+    def fluents(self) -> set[Atom]:
+        """The fluent atoms of the transformed explanation graph."""
+        return {a for a in self.atoms_timed if a.is_fluent}
+
+    @cached_property
+    def partitions(self) -> dict[int, set[Atom]]:
+        """The partitions of the explanation graph, indexed by timepoint."""
+        partitions: dict[int, set[Atom]] = {}
+        for atom in self.atoms_timed:
+            if (timepoint := atom.time) is not None:
+                partitions.setdefault(timepoint, set()).add(atom)
+        return partitions
+
+    @cached_property
+    def interval(self) -> tuple[int, int]:
+        """The time interval of the explanation graph as a tuple (start, end)."""
+        return min(self.partitions), max(self.partitions)
+
+    @cached_property
+    def length(self) -> int:
+        """The length of the explanation graph (the number of timepoints)."""
+        return self.interval[1] - self.interval[0] + 1
+
+    @cached_property
+    def fluent_matrix(self) -> dict[Symbol, list[ModelMembership]]:
+        """`Symbol` <-> `ModelMembership` matrix for fluents in the transformed explanation graph."""
+        return self._fluent_matrix(self.fluents, self.length)
+
+    @staticmethod
+    def _fluent_matrix(fluents: set[Atom], length: int) -> dict[Symbol, list[ModelMembership]]:
+        """`Symbol` <-> `ModelMembership` matrix for fluents in the transformed explanation graph."""
+        fluent_bases = {a.base for a in fluents}
+        matrix = {a: [ModelMembership.NONE] * length for a in fluent_bases}
+        for atom in fluents:
+            assert atom.time is not None  # make sure time is not None
+            matrix[atom.base][atom.time] = atom.membership
+        return matrix
+
+    @staticmethod
+    def _explanation_symbols_to_atoms(symbols: set[Symbol]) -> set[Atom]:
+        # collect symbols indicating model associations
+        models: dict[Symbol, set[Model]] = {}
+        for symbol in symbols:
+            if symbol.match("model", 2):
+                atom = symbol.arguments[0]
+                model = Model(str(symbol.arguments[1]))
+                models.setdefault(atom, set()).add(model)
+        # collect node atoms, then associate them with their models
+        atoms = set()
+        for symbol in symbols:
+            if symbol.match("node", 2) and str(symbol.arguments[1]) == "atom":
+                atom = symbol.arguments[0]
+                atom_models = models.get(atom, set())
+                atoms.add(Atom(atom, atom_models))
+        return atoms
+
+    def get_model_state_at(self, model: Model, t: int) -> set[Symbol]:
+        """Get the state of the domain world at given time `t` in the model `model`."""
+        if t not in range(self.interval[0], self.interval[1] + 1):
+            raise ValueError(f"Time {t} is out of range for the explanation interval {self.interval}")
+        atoms_model_partition_t = {a.base for a in self.partitions[t] if a.membership.has(model)}
+        atoms_static = {a.base for a in self.atoms_static}
+        atoms_t = atoms_model_partition_t.union(atoms_static)
+        log.info(f"Model state at t={t}: {[str(a) for a in atoms_t]}")
+        return atoms_t
+
+
+@dataclass(frozen=True)
+class Explanation(Reference):
+    """Representation of an explanation."""
+
+    @cached_property
     def symbols_transformed(self) -> set[Symbol]:
         """The symbols of the explanation graph after temporal transformation."""
         return set(transform_temporal(self.symbols))
@@ -134,19 +227,14 @@ class Reference:
         return to_program(self.symbols_transformed)
 
     @cached_property
-    def atoms(self) -> set[Atom]:
-        """The atoms of the untransformed explanation graph with assigned model memberships."""
-        return Explanation._explanation_symbols_to_atoms(self.symbols)
+    def graph(self) -> TemporalExplanationGraph:
+        """The explanation graph."""
+        return TemporalExplanationGraph.from_symbols(self.symbols_transformed)
 
     @cached_property
     def atoms_transformed(self) -> set[Atom]:
         """The atoms of the transformed explanation graph with assigned model memberships."""
         return Explanation._explanation_symbols_to_atoms(self.symbols_transformed)
-
-    @cached_property
-    def atoms_static(self) -> set[Atom]:
-        """The static atoms of the untransformed explanation graph."""
-        return {a for a in self.atoms if a.time is None}
 
     @cached_property
     def atoms_transformed_timed(self) -> set[Atom]:
@@ -180,35 +268,12 @@ class Reference:
     @cached_property
     def length_transformed(self) -> int:
         """The length of the transformed explanation graph (the number of timepoints)."""
-        return self.interval_transformed[1] - self.interval_transformed[0] + 1
+        return len(self.partitions_transformed)
 
     @cached_property
     def fluent_matrix_transformed(self) -> dict[Symbol, list[ModelMembership]]:
         """`Symbol` <-> `ModelMembership` matrix for fluents in the transformed explanation graph."""
-        fluent_bases = {a.base for a in self.fluents_transformed}
-        matrix = {a: [ModelMembership.NONE] * self.length_transformed for a in fluent_bases}
-        for atom in self.fluents_transformed:
-            assert atom.time is not None  # make sure time is not None
-            matrix[atom.base][atom.time] = atom.membership
-        return matrix
-
-    @staticmethod
-    def _explanation_symbols_to_atoms(symbols: set[Symbol]) -> set[Atom]:
-        # collect symbols indicating model associations
-        models: dict[Symbol, set[Model]] = {}
-        for symbol in symbols:
-            if symbol.match("model", 2):
-                atom = symbol.arguments[0]
-                model = Model(str(symbol.arguments[1]))
-                models.setdefault(atom, set()).add(model)
-        # collect node atoms, then associate them with their models
-        atoms = set()
-        for symbol in symbols:
-            if symbol.match("node", 2) and str(symbol.arguments[1]) == "atom":
-                atom = symbol.arguments[0]
-                atom_models = models.get(atom, set())
-                atoms.add(Atom(atom, atom_models))
-        return atoms
+        return self._fluent_matrix(self.fluents_transformed, self.length_transformed)
 
     def get_model_state_at(self, model: Model, t: int) -> set[Symbol]:
         """Get the state of the domain world at given time `t` in the model `model`."""
@@ -219,16 +284,6 @@ class Reference:
         atoms_t = atoms_model_partition_t.union(atoms_static)
         log.info(f"Model state at t={t}: {[str(a) for a in atoms_t]}")
         return atoms_t
-
-
-@dataclass(frozen=True)
-class Explanation(Reference):
-    """Representation of an explanation."""
-
-    @cached_property
-    def graph(self) -> TemporalExplanationGraph:
-        """The explanation graph."""
-        return TemporalExplanationGraph.from_symbols(self.symbols_transformed)
 
 
 def parse_model(model_prg: str) -> list[str] | None:
@@ -270,7 +325,7 @@ def navigate_reference_models(
 ) -> Generator[Reference]:
     """Yield reference models for the given program."""
     model_symbols = parse_model(model_program)
-    control = clingo.Control(["--warn=none"])
+    control = clingo.Control([str(NUMBER_OF_REFERENCE_MODELS), "--warn=none"])
     reference_pg = construct_program_graph(
         list(files),
         constants=constants,
@@ -280,10 +335,11 @@ def navigate_reference_models(
     model_subgraphs_ctl = set_model_subgraphs_ctl(pg=reference_pg, ctl=control, model_symbols=model_symbols)
     with model_subgraphs_ctl.solve(yield_=True) as solve_handle:
         sh = cast(SolveHandle, solve_handle)
-        if sh.get().satisfiable:
-            for model in sh:
-                yield Reference(set(model.symbols(atoms=True)))
-        else:
+        found_any = False
+        for model in sh:
+            found_any = True
+            yield Reference(set(model.symbols(atoms=True)))
+        if not found_any:
             return None
 
 

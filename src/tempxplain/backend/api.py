@@ -35,17 +35,22 @@ def ping(_state: ServerState) -> Literal["pong"]:
 @rpc.method()
 def get_visualization(state: ServerState, model: MODEL_STRING_REF_TYPE | MODEL_STRING_FOIL_TYPE, t: int) -> str | None:
     """Get the domain visualization of the specified model at time `t` as svg."""
-    state_model = state.current_reference if model == MODEL_STRING_REF else state.current_explanation
-    if state_model is None:
+    match Model(model):
+        case Model.REFERENCE:
+            current = state.current_reference
+        case Model.FOIL:
+            current = state.current_explanation
+    if current is None:
         log.warning(f"Cannot generate visualization for model {model} since there is none available")
         return None
-    t_start = state_model[1].interval_transformed[0]
-    t_end = state_model[1].interval_transformed[1]
+    current = current[1]
+    t_start = current.interval[0]
+    t_end = current.interval[1]
     log.info(f"{t}, [{t_start},{t_end}]")
     if not (t_start <= t <= t_end):
         log.warning(f"Cannot generate visualization at t={t} since it is out of bounds [{t_start},{t_end}]")
         return None
-    return visualize_domain(state, Model(model), t)
+    return visualize_domain(state, current, t)
 
 
 @rpc.method()
@@ -57,6 +62,7 @@ def get_program_data(state: ServerState) -> ProgramData:
 @rpc.method()
 def set_query(state: ServerState, query: str) -> None:
     """Set the query string."""
+    log.info(f"Setting query: {query}")
     state._query = query
 
 
@@ -64,6 +70,13 @@ def set_query(state: ServerState, query: str) -> None:
 def get_query(state: ServerState) -> str | None:
     """Get the query string."""
     return state._query
+
+
+@rpc.method()
+def next_foil(state: ServerState) -> ModelFoil | None:
+    """Find the next foil model."""
+    state.next_explanation()
+    return get_foil(state)
 
 
 @rpc.method()
@@ -76,11 +89,9 @@ def get_reference(state: ServerState) -> ModelReference | None:
             return ModelReference(
                 id=ref_id,
                 program=ref.program,
-                partitions={t: [str(a.symbol) for a in atoms] for t, atoms in ref.partitions_transformed.items()},
-                timeframe_full=ref.interval_transformed,
-                fluent_matrix={
-                    str(f): [m.value for m in membership] for f, membership in ref.fluent_matrix_transformed.items()
-                },
+                partitions={t: [str(a.symbol) for a in atoms] for t, atoms in ref.partitions.items()},
+                timeframe_full=ref.interval,
+                fluent_matrix={str(f): [m.value for m in membership] for f, membership in ref.fluent_matrix.items()},
             )
 
 

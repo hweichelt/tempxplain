@@ -11,6 +11,10 @@ class QueryState {
     this.#parse();
   }
 
+  async set_query() {
+    backend.call("set_query", { query: this.raw });
+  }
+
   async #parse() {
     const result = await backend.call("parse_query", { query_raw: this.raw });
     if (result.error) {

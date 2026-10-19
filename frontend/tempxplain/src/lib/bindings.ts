@@ -8,6 +8,7 @@ export interface Api {
     result: ModelReference | null;
   };
   get_foil: { params: Record<string, never>; result: ModelFoil | null };
+  next_foil: { params: Record<string, never>; result: ModelFoil | null };
   parse_query: {
     params: { query_raw: string };
     result: QueryResult;

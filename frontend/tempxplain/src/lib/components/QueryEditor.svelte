@@ -8,6 +8,7 @@
     import { query_state } from "$lib/state/query_state.svelte";
     import Formula from "./Formula.svelte";
     import OperatorButton from "./OperatorButton.svelte";
+    import { model_state } from "$lib/state/model_state.svelte";
 
     interface QueryEditorProps {
         dialog_open: boolean;
@@ -21,6 +22,13 @@
 
     function parse_query() {
         query_state.set_raw(query);
+    }
+
+    function find_explanation() {
+        if (!query_correct) return;
+        query_state.set_query();
+        model_state.next_foil();
+        dialog_open = false;
     }
 
     const operators = [
@@ -81,9 +89,9 @@
     <form>
         <Dialog.Trigger
             type="button"
-            class={buttonVariants({ variant: "outline" })}
+            class={buttonVariants({ variant: "default" })}
         >
-            Write Query
+            Enter your Query
         </Dialog.Trigger>
         <Dialog.Content class="sm:max-w-3xl">
             <Dialog.Header>
@@ -178,6 +186,7 @@
                 </Dialog.Close>
                 <Button
                     type="submit"
+                    onclick={find_explanation}
                     disabled={!query_correct || query.length === 0}
                 >
                     Find Explanation

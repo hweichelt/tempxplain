@@ -11,6 +11,13 @@ class ModelState {
     this.#update();
   }
 
+  async next_foil() {
+    const result = await backend.call("next_foil");
+    if (result !== null) {
+      this.explanation = result;
+    }
+  }
+
   async #update() {
     this.is_loading = true;
     const response_program_data = await backend.call("get_program_data");
