@@ -7,5 +7,9 @@ import path from "path";
 export default defineConfig({
   plugins: [tailwindcss(), svelte()],
   resolve: { alias: { $lib: path.resolve("./src/lib") } },
-  build: { outDir: "../../src/tempxplain/frontend", emptyOutDir: true },
+  build: {
+    outDir: "../../src/tempxplain/frontend",
+    emptyOutDir: true,
+    cssTarget: ["chrome123", "firefox120", "safari17.5"], // raised for light-dark support
+  },
 });
