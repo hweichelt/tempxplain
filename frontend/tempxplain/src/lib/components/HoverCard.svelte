@@ -2,7 +2,6 @@
 
 <script lang="ts">
     import * as HoverCard from "$lib/components/ui/hover-card/index";
-    import { fly } from "svelte/transition";
     import type { Snippet } from "svelte";
 
     interface HoverCardProps {
@@ -26,19 +25,10 @@
         {@render trigger()}
     </HoverCard.Trigger>
     <HoverCard.Content
-        class="w-80 {className} rounded-sm mt-1"
-        forceMount
+        class="w-80 {className} rounded-sm mt-1 duration-200"
         side="bottom"
         align={content_align}
     >
-        {#snippet child({ wrapperProps, props, open })}
-            {#if open}
-                <div {...wrapperProps}>
-                    <div {...props} transition:fly={{ y: -10, duration: 300 }}>
-                        {@render children()}
-                    </div>
-                </div>
-            {/if}
-        {/snippet}
+        {@render children()}
     </HoverCard.Content>
 </HoverCard.Root>
