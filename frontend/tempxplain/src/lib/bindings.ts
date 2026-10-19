@@ -38,6 +38,7 @@ export type Node = {
   inertia?: boolean;
   atom_type?: "action" | "fluent";
   first_order?: string;
+  addable?: boolean;
 };
 
 export type Edge = {

@@ -4,7 +4,7 @@
     import type { ModelMembership } from "$lib/bindings";
     import * as Popover from "$lib/components/ui/popover/index.js";
     import bot from "../../../assets/bot.svg";
-    import { Asterisk, X } from "@lucide/svelte";
+    import { Asterisk, Plus, X } from "@lucide/svelte";
 
     interface NodeBaseProps {
         data: NodeData;
@@ -65,6 +65,11 @@
     {#if variant === "rule_choice"}
         <div class="indicator-choice flex items-center justify-center">
             <Asterisk size={11.5} stroke-width={2.75} color="white" />
+        </div>
+    {/if}
+    {#if data.properties.addable}
+        <div class="indicator-added flex items-center justify-center">
+            <Plus size={11.5} stroke-width={2.75} color="white" />
         </div>
     {/if}
     {#if variant === "atom"}
@@ -247,6 +252,17 @@
         border-radius: 0 1rem 1rem 0;
     }
     .indicator-choice {
+        position: absolute;
+        left: -0.2rem;
+        top: -0.2rem;
+        height: 1rem;
+        width: 1rem;
+        border-radius: 50%;
+        background: var(--border-color);
+        font-size: 0.7rem;
+        text-align: center;
+    }
+    .indicator-added {
         position: absolute;
         top: -0.2rem;
         right: -0.2rem;
