@@ -1,6 +1,6 @@
 """Functionality for generating the explanations with asplain."""
 
-from collections.abc import Iterable
+from collections.abc import Generator, Iterable
 from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
@@ -28,7 +28,7 @@ log = get_logger("server.explain")
 enable_python()
 
 DEFAULT_COST_ENCODING = Path(__file__).parent.parent / "encodings" / "cost" / "default.lp"
-NUMBER_OF_EXPLANATIONS = 1
+NUMBER_OF_EXPLANATIONS = 0
 MODEL_STRING_REF_TYPE = Literal["ref"]
 MODEL_STRING_REF: Literal["ref"] = get_args(MODEL_STRING_REF_TYPE)[0]
 MODEL_STRING_FOIL_TYPE = Literal["foil"]
@@ -118,8 +118,8 @@ class Atom:
 
 
 @dataclass(frozen=True)
-class Explanation:
-    """Representation of an explanation graph."""
+class Reference:
+    """Representation of an explanation model."""
 
     symbols: set[Symbol]
 
@@ -132,11 +132,6 @@ class Explanation:
     def program(self) -> str:
         """The explanation graph as a program string."""
         return to_program(self.symbols_transformed)
-
-    @cached_property
-    def graph(self) -> TemporalExplanationGraph:
-        """The explanation graph."""
-        return TemporalExplanationGraph.from_symbols(self.symbols_transformed)
 
     @cached_property
     def atoms(self) -> set[Atom]:
@@ -226,6 +221,16 @@ class Explanation:
         return atoms_t
 
 
+@dataclass(frozen=True)
+class Explanation(Reference):
+    """Representation of an explanation."""
+
+    @cached_property
+    def graph(self) -> TemporalExplanationGraph:
+        """The explanation graph."""
+        return TemporalExplanationGraph.from_symbols(self.symbols_transformed)
+
+
 def parse_model(model_prg: str) -> list[str] | None:
     """
     Parse a model program to get the model's symbol strings.
@@ -257,20 +262,15 @@ def transform_temporal(symbols: Iterable[Symbol]) -> list[Symbol]:
     )
 
 
-def explanation(
+def navigate_reference_models(
     files: list[str],
     constants: dict[str, str],
     assumptions: set[tuple[str, bool]],
     model_program: str,
-    query: str,
-) -> Explanation:
-    """Compute the explanation graph for a given program with query."""
-    # Pre-Processing & Setup
-    query_prg = parse_query_program(query)
-    cost_prg = read_file(DEFAULT_COST_ENCODING)
+) -> Generator[Reference]:
+    """Yield reference models for the given program."""
     model_symbols = parse_model(model_program)
     control = clingo.Control(["--warn=none"])
-
     reference_pg = construct_program_graph(
         list(files),
         constants=constants,
@@ -280,43 +280,66 @@ def explanation(
     model_subgraphs_ctl = set_model_subgraphs_ctl(pg=reference_pg, ctl=control, model_symbols=model_symbols)
     with model_subgraphs_ctl.solve(yield_=True) as solve_handle:
         sh = cast(SolveHandle, solve_handle)
+        if sh.get().satisfiable:
+            for model in sh:
+                yield Reference(set(model.symbols(atoms=True)))
+        else:
+            return None
 
-        model_found = False
+
+def find_foil(
+    program_graph: str,
+    query_program: str,
+    cost_program: str,
+    number_of_foils: int = NUMBER_OF_EXPLANATIONS,
+) -> Generator[Explanation]:
+    """Find a single foil explanation for the given program graph, query program, and cost program."""
+    control = set_foil_ctl(
+        pg=program_graph,
+        query_prg=query_program,
+        cost_prg=cost_program,
+        number_of_foils=number_of_foils,
+    )
+    with control.solve(yield_=True) as foil_handle:
+        sh = cast(SolveHandle, foil_handle)
+
         for model in sh:
-            model_found = True
-            symbols = model.symbols(shown=True)
-            reference_model_pg = symbols_to_prg(list(symbols))
-            foil_ctl = set_foil_ctl(
-                pg=reference_model_pg,
-                query_prg=query_prg,
-                cost_prg=cost_prg,
-                number_of_foils=NUMBER_OF_EXPLANATIONS,
-            )
-            with foil_ctl.solve(yield_=True) as foil_handle:
-                fh = cast(SolveHandle, foil_handle)
+            if not model.optimality_proven:
+                log.info(f"Skipping non-optimal foil model {model.number}")
+                continue
+            yield Explanation(set(model.symbols(shown=True)))
+        log.warning("No foil found.")
 
-                for foil_model in fh:
-                    if not foil_model.optimality_proven:
-                        log.debug(f"Skipping non-optimal foil model {foil_model.number}")
-                        continue
-                    return Explanation(set(foil_model.symbols(shown=True)))
-                log.warning("No foil found.")
 
-        if not model_found:
-            log.warning("UNSATISFIABLE. Will proceed to explain.")
-            foil_ctl = set_foil_ctl(
-                pg=reference_pg,
-                query_prg=query_prg,
-                cost_prg=cost_prg,
-                number_of_foils=NUMBER_OF_EXPLANATIONS,
-            )
-            with foil_ctl.solve(yield_=True) as foil_handle:
-                fh = cast(SolveHandle, foil_handle)
+def navigate_foil_models(
+    files: list[str],
+    constants: dict[str, str],
+    assumptions: set[tuple[str, bool]],
+    reference_model: Reference | None,
+    query: str,
+) -> Generator[Explanation]:
+    """Compute the explanation graph for a given program with query."""
+    query_prg = parse_query_program(query)
+    cost_prg = read_file(DEFAULT_COST_ENCODING)
+    reference_pg = construct_program_graph(
+        list(files),
+        constants=constants,
+        assumptions=list(assumptions),
+        dynamic_tags_files=[],
+    )
 
-                for foil_model in fh:
-                    if not foil_model.optimality_proven:
-                        log.info(f"Skipping non-optimal foil model {foil_model.number}")
-                        continue
-                    return Explanation(set(foil_model.symbols(shown=True)))
-                log.warning("No foil found.")
-    raise RuntimeError("No explanation graph found.")
+    found_any = False
+    if reference_model is not None:
+        reference_model_pg = symbols_to_prg(list(reference_model.symbols))
+        for exp in find_foil(reference_model_pg, query_prg, cost_prg):
+            found_any = True
+            yield exp
+
+    else:
+        log.warning("UNSATISFIABLE. Will proceed to explain.")
+        for exp in find_foil(reference_pg, query_prg, cost_prg):
+            found_any = True
+            yield exp
+
+    if not found_any:
+        raise RuntimeError("No explanation graph found.")

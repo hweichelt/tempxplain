@@ -1,15 +1,13 @@
 """The WebSocket server connecting to the frontend."""
 
+from collections.abc import Generator
 from contextlib import suppress
-from dataclasses import dataclass
-from functools import cached_property
-from typing import Any
+from typing import Any, cast
 
-from asplain.utils.viz import viz_graph
 from websockets.asyncio.server import Server, ServerConnection, serve
 from websockets.exceptions import ConnectionClosed
 
-from ..explain import Explanation, explanation
+from ..explain import Explanation, Reference, navigate_foil_models, navigate_reference_models
 from ..utils.logging import get_logger
 from .bindings import ProgramData
 from .rpc import Registry
@@ -23,38 +21,82 @@ PATH_EXPLANATION_GRAPH = "out/graph"
 log = get_logger("server")
 
 
-@dataclass
 class ServerState:
     """
     State of the backend server.
     """
 
-    program_data: ProgramData
-    query: str | None
-    program: str = ""
-
-    @cached_property
-    def explanation(self) -> Explanation | None:
-        """The explanation for the provided program and query."""
-        if self.query is None:
-            return None
-
-        exp = explanation(
+    def __init__(self, program_data: ProgramData, query: str | None = None) -> None:
+        """Initialize the server state with the given program data."""
+        self.program_data = program_data
+        self._query: str | None = query
+        self._current_reference_id: int | None = None
+        self._current_explanation_id: tuple[int, int] | None = None
+        self._references: dict[int, Reference] = {}
+        self._explanations: dict[tuple[int, int], Explanation] = {}
+        self._generator_foil: Generator[Explanation] | None = None
+        self._generator_reference: Generator[Reference] = navigate_reference_models(
             files=self.program_data.files,
             constants={},
             assumptions=set(),
             model_program="",
-            query=self.query,
         )
-        log.info(f"Writing explanation graph to disk: {PATH_EXPLANATION_GRAPH}")
-        with open(f"{PATH_EXPLANATION_GRAPH}.lp", "w") as f:
-            f.write(exp.program)
-        viz_graph(
-            pg=exp.program,
-            title="Explanation Graph",
-            name=f"{PATH_EXPLANATION_GRAPH}.lp",
-        )
-        return exp
+
+        self.next_reference()
+
+    @property
+    def current_reference(self) -> Reference | None:
+        """Return the current reference model ID."""
+        if self._current_reference_id is None:
+            return None
+        return self._references[self._current_reference_id]
+
+    @property
+    def current_explanation(self) -> Explanation | None:
+        """Return the current reference model ID."""
+        if self._current_explanation_id is None:
+            return None
+        return self._explanations[self._current_explanation_id]
+
+    def get_explanation(self, ref_id: int, foil_id: int) -> Explanation:
+        """Explain the provided reference model with it's proivded foil counterpart."""
+        return self._explanations[(ref_id, foil_id)]
+
+    def next_reference(self) -> None:
+        """Find the next reference model."""
+        try:
+            model = next(self._generator_reference)
+            model_id = 1 if self._current_reference_id is None else self._current_reference_id + 1
+            self._references[model_id] = model
+            self._current_reference_id = model_id
+        except StopIteration:
+            log.error("Reference models exhausted")
+
+    def next_explanation(self) -> None:
+        """Find the next explanation."""
+        if self._generator_foil is None:
+            if self._current_reference_id is None:
+                raise RuntimeError("No reference model available to explain")
+            if self._query is None:
+                raise RuntimeError("No query available to explain")
+            self._generator_foil = navigate_foil_models(
+                files=self.program_data.files,
+                constants={},
+                assumptions=set(),
+                reference_model=self._references[self._current_reference_id],
+                query=self._query,
+            )
+        try:
+            exp = next(self._generator_foil)
+            exp_id = (
+                (1, 1)
+                if self._current_explanation_id is None
+                else (cast(int, self._current_reference_id), self._current_explanation_id[1] + 1)
+            )
+            self._explanations[exp_id] = exp
+            self._current_explanation_id = exp_id
+        except StopIteration:
+            log.error("Foil models exhausted")
 
 
 async def start_server(registry: Registry[Any], state: object, host: str, port: int) -> Server:
