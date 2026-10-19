@@ -21,6 +21,7 @@
     import ExplanationGraph from "$lib/components/graph/ExplanationGraph.svelte";
     import QueryEditor from "$lib/components/QueryEditor.svelte";
     import Button from "$lib/components/ui/button/button.svelte";
+    import { query_state } from "$lib/state/query_state.svelte";
 
     $effect(() => {
         backend.connect().catch(() => {});
@@ -52,7 +53,7 @@
     let t_conter_poll = $state(250);
     let t_counter_active = $state(false);
     let t_counter_running = $state(false);
-    let query_dialog_open = $state(false);
+    let query_dialog_open = $derived(query_state.open_dialog);
 
     let keyboard_controls_blocked = $derived(
         t_counter_running || query_dialog_open,

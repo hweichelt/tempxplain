@@ -4,10 +4,19 @@ import type { Query, QueryError } from "$lib/bindings";
 class QueryState {
   raw: string = $state("");
   parsed: Query[] | undefined = $state();
+  open_dialog: boolean = $state(false);
   error: QueryError | undefined = $state();
 
   constructor() {
-    this.get_query();
+    let initial_query = this.get_query();
+    this.open_dialog_on_start(initial_query);
+  }
+
+  async open_dialog_on_start(query_promise: Promise<string | null>) {
+    const result = await query_promise;
+    if (result) {
+      this.open_dialog = true;
+    }
   }
 
   async set_raw(raw: string) {
@@ -20,6 +29,7 @@ class QueryState {
     if (result) {
       this.set_raw(result);
     }
+    return result;
   }
 
   async set_query() {
