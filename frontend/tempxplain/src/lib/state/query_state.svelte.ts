@@ -6,9 +6,20 @@ class QueryState {
   parsed: Query[] | undefined = $state();
   error: QueryError | undefined = $state();
 
+  constructor() {
+    this.get_query();
+  }
+
   async set_raw(raw: string) {
     this.raw = raw;
     this.#parse();
+  }
+
+  async get_query() {
+    const result = await backend.call("get_query");
+    if (result) {
+      this.set_raw(result);
+    }
   }
 
   async set_query() {

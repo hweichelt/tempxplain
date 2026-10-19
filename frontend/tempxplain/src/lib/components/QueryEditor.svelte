@@ -15,7 +15,7 @@
     }
     let { dialog_open = $bindable() }: QueryEditorProps = $props();
 
-    let query = $state("");
+    let query = $derived(query_state.raw);
     let query_correct = $derived(query_state.error === undefined);
 
     let parsed_queries = $derived(query_state.parsed);
