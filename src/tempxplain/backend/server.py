@@ -30,12 +30,15 @@ class ServerState:
     """
 
     program_data: ProgramData
-    query: str
+    query: str | None
     program: str = ""
 
     @cached_property
-    def explanation(self) -> Explanation:
+    def explanation(self) -> Explanation | None:
         """The explanation for the provided program and query."""
+        if self.query is None:
+            return None
+
         exp = explanation(
             files=self.program_data.files,
             constants={},

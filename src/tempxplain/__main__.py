@@ -27,8 +27,8 @@ def run_backend(
     host: str,
     port: int,
     log: Logger,
-    query: str,
     files: list[str],
+    query: str | None,
     viz_file: str | None,
 ) -> None:
     """Start the backend in an async environment."""

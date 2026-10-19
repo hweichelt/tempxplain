@@ -50,3 +50,23 @@ class QueryResult:
     raw: str
     queries: list[Query] | None
     error: QueryError | None
+
+
+@dataclass
+class ModelReference:
+    """A reference model of the explanation."""
+
+    id: int
+    atoms: list[str]
+    fluent_matrix: dict[str, list[str]]
+
+
+@dataclass
+class ModelFoil:
+    """A foil model of the explanation."""
+
+    id: int
+    reference_id: int
+    atoms: list[str]
+    fluent_matrix: dict[str, list[str]]
+    explanation: Explanation

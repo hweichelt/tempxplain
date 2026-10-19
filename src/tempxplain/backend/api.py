@@ -50,6 +50,8 @@ def get_visualization(state: ServerState, model: MODEL_STRING_REF_TYPE | MODEL_S
     """Get the domain visualization of the specified model at time `t` as svg."""
     if state.program_data.viz_file is None:
         return None
+    if state.explanation is None:
+        return None
     t_start = state.explanation.interval_transformed[0]
     t_end = state.explanation.interval_transformed[1]
     log.info(f"{t}, [{t_start},{t_end}]")
@@ -66,9 +68,12 @@ def get_program_data(state: ServerState) -> ProgramData:
 
 
 @rpc.method()
-def get_explanation(state: ServerState) -> Explanation:
+def get_explanation(state: ServerState) -> Explanation | None:
     """Get details of the logic program."""
     exp = state.explanation
+    if exp is None:
+        return None
+
     with open("out/graph.json", "w") as f:
         json.dump(exp.graph.json, f)
     return Explanation(

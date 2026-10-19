@@ -60,7 +60,7 @@ def get_parser() -> ArgumentParser:
     parser.add_argument(
         "-q",
         "--query",
-        required=True,
+        required=False,
         help="the query that should be satisfied in the foil model. (Follows the tempql syntax)",
     )
     parser.add_argument("--viz", help="visualization encoding for a domain timestep")
