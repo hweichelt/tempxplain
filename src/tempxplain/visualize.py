@@ -31,7 +31,11 @@ def visualize_domain(state: ServerState, graph: ModelGraph, model: Model, t: int
         log.warning("No visualization file was provided, so nothing was rendered.")
         return None
     ctl = Control(["1", "--warn=none"])  # limit to 1 model (no warnings)
-    ctl.add("base", [], to_program(graph.get_model_state_at(model, t)))
+    model_at_t = graph.get_model_state_at(model, t)
+    log.debug(f"Model at t={t}: {model_at_t}")
+    model_at_t_prgoram = to_program(model_at_t)
+    log.debug(f"Model at t={t} (program): {model_at_t_prgoram}")
+    ctl.add("base", [], model_at_t_prgoram)
     ctl.load(state.program_data.viz_file)
     ctl.ground([("base", [])], context=ClingraphContext())
     fb = Factbase()
