@@ -68,3 +68,10 @@ holds(reached_goal(R),T+1) :- holds(reached_goal(R),T), not has_action(R,T), tim
 % @label("Robot {} has to have reached its goal position at the time horizon {}",(R,T,))
 % @time(T)
 :- not holds(reached_goal(R),T), robot(R), time(T), not time(T+1).
+
+% @label("Vertex conflict for robots {} and {} at node {} at time {}",(R1,R2,POS,T,))
+% @time(T)
+:- holds(at(R1,POS),T), holds(at(R2,POS),T), time(T), R1!=R2.
+% @label("Edge conflict for robots {} and {} at nodes {} and {} at time {}",(R1,R2,POS1,POS2,T,))
+% @time(T)
+:- holds(at(R1,POS1),T), holds(at(R2,POS2),T), holds(at(R1,POS2),T+1), holds(at(R2,POS1),T+1), time(T), time(T+1), R1!=R2, POS1!=POS2.
