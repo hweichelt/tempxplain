@@ -1,3 +1,0 @@
-#include "included.lp".
-
-a.
