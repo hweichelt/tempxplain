@@ -24,6 +24,7 @@ export type ModelMembership = "none" | "ref" | "foil" | "both";
 
 export type ProgramData = {
   files: string[];
+  viz_file: string | null;
 };
 
 export type Node = {

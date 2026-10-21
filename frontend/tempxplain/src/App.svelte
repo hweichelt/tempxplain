@@ -45,7 +45,9 @@
             return model_state.reference?.fluent_matrix;
         return model_state.explanation.fluent_matrix;
     });
-    let visualization = $state(true);
+    let has_visualization = $derived(
+        model_state.program_data?.viz_file != null,
+    );
     let filter: ModelMembership = $state("ref");
     let t_counter = $state(1);
     let t_counter_seconds = $state(2);
@@ -78,6 +80,7 @@
                 break;
         }
     }
+    let grid_cols_main = $derived(has_visualization ? "2fr 1fr" : "1fr");
 </script>
 
 <ModeWatcher />
@@ -146,7 +149,7 @@
                 <ModeToggle />
             </div>
         </header>
-        <main>
+        <main style:grid-template-columns={grid_cols_main}>
             <div
                 id="graph"
                 class="p-4 grid grid-rows-[auto_minmax(0,1fr)] gap-2"
@@ -191,14 +194,16 @@
                     {/if}
                 </div>
             </div>
-            <div id="visualization" class="border-l">
-                <ModelVisuals
-                    bind:filter
-                    bind:timestep
-                    bind:visualization
-                    {model_status}
-                />
-            </div>
+            {#if has_visualization}
+                <div id="visualization" class="border-l">
+                    <ModelVisuals
+                        bind:filter
+                        bind:timestep
+                        bind:visualization={has_visualization}
+                        {model_status}
+                    />
+                </div>
+            {/if}
             <div id="timeline" class="border-t">
                 {#if timeframe !== undefined && fluents !== undefined}
                     <Timeline
@@ -230,7 +235,6 @@
     }
     main {
         display: grid;
-        grid-template-columns: 2fr 1fr;
         grid-template-rows: minmax(0, 2fr) minmax(0, 1fr);
         grid-template-areas:
             "exp viz"
