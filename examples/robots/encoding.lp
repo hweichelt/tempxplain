@@ -9,9 +9,10 @@ time(0..horizon).
 action_type(up). action_type(down). action_type(left). action_type(right).
 % Define fulents
 fluent(at). fluent(reached_goal).
-
 % Directional move differences
 diff(up,(0,-1)). diff(down,(0,1)). diff(left,(-1,0)). diff(right,(1,0)).
+% connected cells
+edge((X,Y),(X+DX,Y+DY)) :- cell((X,Y)), cell((X+DX,Y+DY)), diff(A,(DX,DY)).
 
 % ACTION GENERATION
 
@@ -47,7 +48,7 @@ holds(at(R,POS),0) :- start(R,POS).
 
 % @label("Robot {} moves {} from ({},{}) at time {}",(R,A,X,Y,T,))
 % @time(T)
-holds(at(R,(X+DX,Y+DY)),T+1) :- occurs(action(R,A),T), diff(A,(DX,DY)), holds(at(R,(X,Y)),T).
+holds(at(R,(X+DX,Y+DY)),T+1) :- occurs(action(R,A),T), diff(A,(DX,DY)), holds(at(R,(X,Y)),T), cell((X+DX,Y+DY)).
 % @label("Robot {} reached its goal position {} at time {}",(R,POS,T,))
 % @time(T)
 holds(reached_goal(R),T) :- holds(at(R,POS),T), goal(R,POS).
@@ -71,7 +72,9 @@ holds(reached_goal(R),T+1) :- holds(reached_goal(R),T), not has_action(R,T), tim
 
 % @label("Vertex conflict for robots {} and {} at node {} at time {}",(R1,R2,POS,T,))
 % @time(T)
-:- holds(at(R1,POS),T), holds(at(R2,POS),T), time(T), R1!=R2.
+:- holds(at(R1,POS),T), holds(at(R2,POS),T), time(T), R1<R2.
 % @label("Edge conflict for robots {} and {} at nodes {} and {} at time {}",(R1,R2,POS1,POS2,T,))
 % @time(T)
-:- holds(at(R1,POS1),T), holds(at(R2,POS2),T), holds(at(R1,POS2),T+1), holds(at(R2,POS1),T+1), time(T), time(T+1), R1!=R2, POS1!=POS2.
+:- holds(at(R1,POS1),T), holds(at(R2,POS2),T), holds(at(R1,POS2),T+1), holds(at(R2,POS1),T+1), edge(POS1,POS2), R1<R2.
+
+#show occurs/2.
