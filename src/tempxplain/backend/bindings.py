@@ -11,6 +11,7 @@ class ProgramData:
 
     files: list[str]
     viz_file: str | None = None
+    cost_file: str | None = None
 
 
 @dataclass

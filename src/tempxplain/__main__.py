@@ -29,11 +29,16 @@ def run_backend(
     log: Logger,
     files: list[str],
     query: str | None,
+    cost_file: str | None,
     viz_file: str | None,
 ) -> None:
     """Start the backend in an async environment."""
     try:
-        data = ProgramData(files=files, viz_file=viz_file)
+        data = ProgramData(
+            files=files,
+            viz_file=viz_file,
+            cost_file=cost_file,
+        )
         state = ServerState(data, query=query)
         asyncio.run(run_server(rpc, state, host, port))
     except KeyboardInterrupt:
@@ -68,7 +73,15 @@ def main() -> None:
     if not args.no_frontend:
         run_frontend(args.host, args.port_frontend, backend_url(args.host, args.port), log, not args.no_open)
 
-    run_backend(args.host, args.port, log, query=args.query, files=args.files, viz_file=args.viz)
+    run_backend(
+        args.host,
+        args.port,
+        log,
+        query=args.query,
+        files=args.files,
+        cost_file=args.cost,
+        viz_file=args.viz,
+    )
 
 
 if __name__ == "__main__":

@@ -320,10 +320,12 @@ def navigate_foil_models(
     assumptions: set[tuple[str, bool]],
     reference_model: ModelGraph | None,
     query: str,
+    custom_cost: str | None = None,
 ) -> Generator[Explanation]:
     """Compute the explanation graph for a given program with query."""
     query_prg = parse_query_program(query)
-    cost_prg = read_file(DEFAULT_COST_ENCODING)
+    cost_file = Path(custom_cost) if custom_cost is not None else DEFAULT_COST_ENCODING
+    cost_prg = read_file(cost_file)
     reference_pg = construct_program_graph(
         list(files),
         constants=constants,

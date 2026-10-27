@@ -85,6 +85,7 @@ class ServerState:
                 assumptions=set(),
                 reference_model=self._references[self._current_reference_id],
                 query=self._query,
+                custom_cost=self.program_data.cost_file,
             )
         try:
             exp = next(self._generator_foil)
