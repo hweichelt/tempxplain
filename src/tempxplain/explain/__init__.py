@@ -259,7 +259,7 @@ def transform_temporal(symbols: Iterable[Symbol]) -> list[Symbol]:
             Transformation.NO_MODEL,
             Transformation.FACT_RULES,
             Transformation.STATIC_DOMAIN_FACTS,
-            Transformation.ORPHANS,
+            Transformation.LEAF_RULES,
         ],
     )
 
