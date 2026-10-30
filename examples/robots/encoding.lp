@@ -47,10 +47,8 @@ holds(reached_goal(R),T) :- holds(at(R,POS),T), goal(R,POS).
 % INERTIA RULES
 
 % @label("Robot {} doesn't move from {} at {} since no action is chosen",(R,POS,T,))
-% @inertia
 holds(at(R,POS),T+1) :- holds(at(R,POS),T), not has_action(R,T), time(T).
 % @label("Robot {} already reached its goal position at {}",(R,T,))
-% @inertia
 holds(reached_goal(R),T+1) :- holds(reached_goal(R),T), not has_action(R,T), time(T).
 
 % CONSTRAINTS

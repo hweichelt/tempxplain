@@ -42,10 +42,8 @@ holds(ready,T) :- holds(called(X),T), holds(at(X),T).
 % INERTIA RULES
 
 % @label("The elevator doesn't change its floor at time {} since action wait is chosen",(T,))
-% @inertia
 holds(at(X),T+1) :- holds(at(X),T), not occurs(up,T), not occurs(down,T), time(T).
 % @label("Call elevator for floor {} at {} if elevator was called before and not served",(X,T+1,))
-% @inertia
 holds(called(X),T+1) :- holds(called(X),T), not holds(served(X),T), time(T).
 
 % CONSTRAINTS
