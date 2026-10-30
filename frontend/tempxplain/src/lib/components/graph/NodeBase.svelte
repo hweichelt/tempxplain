@@ -4,7 +4,7 @@
     import type { ModelMembership } from "$lib/bindings";
     import * as Popover from "$lib/components/ui/popover/index.js";
     import bot from "../../../assets/bot.svg";
-    import { Asterisk, Minus, Plus, X } from "@lucide/svelte";
+    import { ArrowRight, Asterisk, Minus, Plus, X } from "@lucide/svelte";
 
     interface NodeBaseProps {
         data: NodeData;
@@ -136,7 +136,7 @@
                         class="grid grid-cols-[1fr_auto] text-xs text-muted-foreground px-2 items-center gap-1"
                     >
                         <div>Models</div>
-                        <div>
+                        <div class="justify-self-end">
                             <div class="flex flex-row gap-1">
                                 {#if ["both", "ref"].includes(model_membership)}
                                     <div
@@ -161,6 +161,10 @@
                         <div class="justify-self-end">
                             {data.properties.time}
                         </div>
+                        {#if data.properties.inertia}
+                            <div>Type</div>
+                            <div class="justify-self-end">Inertia</div>
+                        {/if}
                         {#if data.properties.addable}
                             <div
                                 class="col-span-2 rounded-sm bg-foreground/10 grid grid-cols-[auto_1fr] px-1 py-0.5 gap-1.5 items-center text-foreground mt-1"
