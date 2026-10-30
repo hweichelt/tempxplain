@@ -52,8 +52,10 @@
         <Handle type="source" position={Position.Right} isConnectable={false} />
     {/if}
     <Handle type="target" position={Position.Left} isConnectable={false} />
-    <div class="label">
-        {data.label}
+    <div class="content">
+        <div class="label px-3 text-nowrap">
+            {data.label}
+        </div>
     </div>
     {#if variant === "rule_constraint"}
         <div
@@ -216,6 +218,24 @@
     .node.selected {
         outline-color: var(--color-foreground);
         opacity: 1 !important;
+    }
+    .node .content {
+        mask-image: linear-gradient(
+            90deg,
+            transparent,
+            white 15%,
+            white 80%,
+            transparent
+        );
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .node.variant-atom .content {
+        justify-content: start;
+        overflow-x: scroll;
     }
     .node .label {
         font-family: "JetBrains Mono";
