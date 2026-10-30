@@ -8,11 +8,11 @@ from clingraph.graphviz import compute_graphs
 from clingraph.orm import Factbase
 from graphviz import Digraph
 
-from tempxplain.utils.logging import get_logger
-from tempxplain.utils.symbols import to_program
-
 from .backend.server import ServerState
+from .error import VisualizationError
 from .explain import Model, ModelGraph
+from .utils.logging import get_logger
+from .utils.symbols import to_program
 
 __all__ = ["visualize_domain"]
 
@@ -43,7 +43,10 @@ def visualize_domain(state: ServerState, graph: ModelGraph, model: Model, t: int
 
     graphs: dict[str, Digraph] = compute_graphs(fb, graphviz_type="directed")
     # Get first (and only) graph
-    name, g = next(iter(graphs.items()))
+    try:
+        name, g = next(iter(graphs.items()))
+    except StopIteration as e:
+        raise VisualizationError("Clingraph failed to render a graph.") from e
     log.debug(f"Rendering graph '{name}' for model {model.value} at t={t}")
     svg = g.pipe(format=FORMAT, engine=ENGINE)
     if save:
