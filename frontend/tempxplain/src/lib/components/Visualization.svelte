@@ -87,8 +87,8 @@
 
     /* BACKGROUND */
     .visualization :global(.vb-t) {--b: transparent}
-    .visualization :global(.vb-background) {--b: var(--color-background)}
-    .visualization :global(.vb-foreground) {--b: var(--color-foreground)}
+    .visualization :global(.vb-bg) {--b: var(--color-background)}
+    .visualization :global(.vb-fg) {--b: var(--color-foreground)}
     .visualization :global(.vb-muted) {--b: var(--color-muted)}
     .visualization :global(.vb-muted-foreground) {--b: var(--color-muted-foreground)}
     .visualization :global(.vb-red) {--b: var(--c-red)}
@@ -106,8 +106,8 @@
 
     /* TEXT */
     .visualization :global(.vt-t) {--t: transparent}
-    .visualization :global(.vt-background) {--t: var(--color-background)}
-    .visualization :global(.vt-foreground) {--t: var(--color-foreground)}
+    .visualization :global(.vt-bg) {--t: var(--color-background)}
+    .visualization :global(.vt-fg) {--t: var(--color-foreground)}
     .visualization :global(.vt-muted) {--t: var(--muted)}
     .visualization :global(.vt-muted-foreground) {--t: var(--muted-foreground)}
     .visualization :global(.vt-red) {--t: var(--c-red)}
@@ -125,8 +125,8 @@
 
     /* STROKE */
     .visualization :global(.vs-t) {--s: transparent}
-    .visualization :global(.vs-background) {--s: var(--color-background)}
-    .visualization :global(.vs-foreground) {--s: var(--color-foreground)}
+    .visualization :global(.vs-bg) {--s: var(--color-background)}
+    .visualization :global(.vs-fg) {--s: var(--color-foreground)}
     .visualization :global(.vs-muted) {--s: var(--muted)}
     .visualization :global(.vs-muted-foreground) {--s: var(--muted-foreground)}
     .visualization :global(.vs-red) {--s: var(--c-red)}

@@ -20,4 +20,13 @@ attr(node,robot(R),height,"0.6"):- at(R,POS).
 attr(node,robot(R),pos,@pos(X,Y)):- at(R,(X,Y)).
 attr(node,robot(R),penwidth,0):- at(R,POS).
 attr(node,robot(R),style,"rounded,filled"):- at(R,POS).
-attr(node,robot(R),class,"vb-gray-2"):- at(R,POS).
+
+
+% Choose robot background color out of predefined palette
+attr(node,robot(0),class,"vb-yellow vt-fg"):- robot(0).
+attr(node,robot(1),class,"vb-red vt-fg"):- robot(1).
+attr(node,robot(2),class,"vb-blue vt-fg"):- robot(2).
+attr(node,robot(3),class,"vb-orange vt-fg"):- robot(3).
+attr(node,robot(4),class,"vb-purple vt-fg"):- robot(4).
+attr(node,robot(5),class,"vb-green vt-fg"):- robot(5).
+attr(node,robot(X),class,"vb-gray-2 vt-fg"):- robot(X), X>5.
