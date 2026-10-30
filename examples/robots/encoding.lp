@@ -55,7 +55,7 @@ holds(reached_goal(R),T) :- holds(at(R,POS),T), goal(R,POS).
 
 % INERTIA RULES
 
-% @label("Robot {} doesn't move from ({},{}) at {} since no action is chosen",(R,POS,T,))
+% @label("Robot {} doesn't move from {} at {} since no action is chosen",(R,POS,T,))
 % @time(T)
 % @inertia
 holds(at(R,POS),T+1) :- holds(at(R,POS),T), not has_action(R,T), time(T).
