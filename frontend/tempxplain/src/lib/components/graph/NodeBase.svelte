@@ -253,18 +253,30 @@
         opacity: 0.5;
     }
     .node.models-both {
-        animation: node-both 3s linear infinite alternate-reverse;
+        animation: node-both 5s linear infinite;
+        background: linear-gradient(
+            90deg,
+            color-mix(in srgb, var(--color-ref) 35%, transparent) 20%,
+            color-mix(in srgb, var(--color-foil) 35%, transparent) 40%,
+            color-mix(in srgb, var(--color-foil) 35%, transparent) 60%,
+            color-mix(in srgb, var(--color-ref) 35%, transparent) 80%
+        );
+        background-size: 500% 100%;
     }
     @keyframes node-both {
         0% {
+            --border-color: var(--color-ref);
+            border-color: var(--color-ref);
+            background-position-x: 100%;
+        }
+        50% {
             --border-color: var(--color-foil);
             border-color: var(--color-foil);
-            background: color-mix(in srgb, var(--color-foil) 35%, transparent);
         }
         100% {
             --border-color: var(--color-ref);
             border-color: var(--color-ref);
-            background: color-mix(in srgb, var(--color-ref) 35%, transparent);
+            background-position-x: 0%;
         }
     }
     .variant-rule_disjunction,
@@ -283,6 +295,9 @@
     }
     @keyframes choice-both {
         0% {
+            background: var(--color-ref);
+        }
+        50% {
             background: var(--color-foil);
         }
         100% {
@@ -323,7 +338,7 @@
         text-align: center;
     }
     .models-both .indicator-choice {
-        animation: choice-both 3s linear infinite alternate-reverse;
+        animation: choice-both 5s linear infinite;
     }
     .node .context {
         position: absolute;
