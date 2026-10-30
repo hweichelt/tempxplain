@@ -21,3 +21,9 @@ tag(R,time(T_MIN)) :- rule_time(R,_), T_MIN = #min{T: rule_time(R,T)}.
 tag(rule(disjunction(H),normal(B)),inertia) :- rule(disjunction(H),normal(B)),
                                                literal_tuple(B,BID), symbol_literal(holds(F,T),BID), BID>0,
                                                atom_tuple(H,A), symbol_literal(holds(F,T+1),A).
+
+% REMOVABLE
+
+% Assumed atoms are removable by default
+tag(N,removable) :- tag(N,assume(_)).
+tag(N,assumed)   :- tag(N,assume(_)).

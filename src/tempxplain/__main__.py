@@ -31,6 +31,7 @@ def run_backend(
     query: str | None,
     cost_file: str | None,
     viz_file: str | None,
+    model_file: str | None,
 ) -> None:
     """Start the backend in an async environment."""
     try:
@@ -38,6 +39,7 @@ def run_backend(
             files=files,
             viz_file=viz_file,
             cost_file=cost_file,
+            model_file=model_file,
         )
         state = ServerState(data, query=query)
         asyncio.run(run_server(rpc, state, host, port))
@@ -81,6 +83,7 @@ def main() -> None:
         files=args.files,
         cost_file=args.cost,
         viz_file=args.viz,
+        model_file=args.model_file,
     )
 
 

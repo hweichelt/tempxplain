@@ -2,13 +2,17 @@
 
 from collections.abc import Generator
 from contextlib import suppress
+from pathlib import Path
 from typing import Any, cast
 
 from websockets.asyncio.server import Server, ServerConnection, serve
 from websockets.exceptions import ConnectionClosed
 
+from tempxplain.utils.io import read_file
+
 from ..explain import Explanation, ModelGraph, navigate_foil_models, navigate_reference_models
 from ..utils.logging import get_logger
+from ..utils.symbols import model_program_to_assumptions
 from .bindings import ProgramData
 from .rpc import Registry
 
@@ -38,7 +42,7 @@ class ServerState:
         self._generator_reference: Generator[ModelGraph] = navigate_reference_models(
             files=self.program_data.files,
             constants={},
-            assumptions=set(),
+            assumptions=model_program_to_assumptions(self.program_data.model_file),
             model_program="",
         )
 
@@ -82,7 +86,7 @@ class ServerState:
             self._generator_foil = navigate_foil_models(
                 files=self.program_data.files,
                 constants={},
-                assumptions=set(),
+                assumptions=model_program_to_assumptions(self.program_data.model_file),
                 reference_model=self._references[self._current_reference_id],
                 query=self._query,
                 custom_cost=self.program_data.cost_file,

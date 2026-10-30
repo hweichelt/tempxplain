@@ -18,7 +18,7 @@ from tempxplain.explain.query import parse_query_program
 
 from ..utils.io import read_file
 from ..utils.logging import get_logger
-from ..utils.symbols import to_program
+from ..utils.symbols import parse_model, to_program
 from .graph import TemporalExplanationGraph
 from .temporal import AtomType, atom_base, atom_time, atom_type, is_action, is_fluent
 
@@ -232,23 +232,6 @@ class Explanation:
     def graph(self) -> TemporalExplanationGraph:
         """The explanation graph."""
         return TemporalExplanationGraph.from_symbols(self.transformed.symbols)
-
-
-def parse_model(model_prg: str) -> list[str] | None:
-    """
-    Parse a model program to get the model's symbol strings.
-    """
-    if not model_prg.strip():
-        return None
-    control_model = clingo.Control(["1", "--warn=none"])
-    control_model.add(model_prg)
-    control_model.ground([("base", [])])
-    with control_model.solve(yield_=True) as solve_handle:
-        sh = cast(SolveHandle, solve_handle)
-        symbols = set()
-        for m in sh:
-            symbols = {str(s) for s in m.symbols(atoms=True)}
-        return list(symbols)
 
 
 def transform_temporal(symbols: Iterable[Symbol]) -> list[Symbol]:
