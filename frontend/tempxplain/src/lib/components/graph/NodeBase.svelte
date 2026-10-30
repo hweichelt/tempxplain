@@ -32,7 +32,11 @@
         rule_constraint: "Constraint",
         atom: "Atom",
     };
-    let rule_type_label: string = $derived(rule_type_labels[variant]);
+    let rule_type_label: string = $derived(
+        data.properties.assumed
+            ? "Force Assumption"
+            : rule_type_labels[variant],
+    );
     const atom_type_labels = {
         action: "Action",
         fluent: "Fluent",
@@ -54,7 +58,11 @@
     <Handle type="target" position={Position.Left} isConnectable={false} />
     <div class="content">
         <div class="label px-3 text-nowrap">
-            {data.label}
+            {#if data.properties.assumed}
+                A
+            {:else}
+                {data.label}
+            {/if}
         </div>
     </div>
     {#if variant === "rule_constraint"}
@@ -70,12 +78,12 @@
         </div>
     {/if}
     {#if data.properties.addable}
-        <div class="indicator-added flex items-center justify-center">
+        <div class="indicator-changed flex items-center justify-center">
             <Plus size={11.5} stroke-width={2.75} color="white" />
         </div>
     {/if}
     {#if data.properties.removable}
-        <div class="indicator-added flex items-center justify-center">
+        <div class="indicator-changed flex items-center justify-center">
             <Minus size={11.5} stroke-width={2.75} color="white" />
         </div>
     {/if}
@@ -330,7 +338,7 @@
         font-size: 0.7rem;
         text-align: center;
     }
-    .indicator-added {
+    .indicator-changed {
         position: absolute;
         top: -0.2rem;
         right: -0.2rem;
@@ -340,6 +348,9 @@
         background: var(--border-color);
         font-size: 0.7rem;
         text-align: center;
+    }
+    div:has(.indicator-constraint) .indicator-changed {
+        --border-color: var(--color-destructive);
     }
     .models-both .indicator-choice {
         animation: choice-both 5s linear infinite;

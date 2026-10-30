@@ -41,6 +41,7 @@ export type Node = {
   first_order?: string;
   addable?: boolean;
   removable?: boolean;
+  assumed?: boolean;
 };
 
 export type Edge = {
