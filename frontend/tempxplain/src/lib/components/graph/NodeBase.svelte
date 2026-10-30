@@ -4,7 +4,7 @@
     import type { ModelMembership } from "$lib/bindings";
     import * as Popover from "$lib/components/ui/popover/index.js";
     import bot from "../../../assets/bot.svg";
-    import { Asterisk, Plus, X } from "@lucide/svelte";
+    import { Asterisk, Minus, Plus, X } from "@lucide/svelte";
 
     interface NodeBaseProps {
         data: NodeData;
@@ -70,6 +70,11 @@
     {#if data.properties.addable}
         <div class="indicator-added flex items-center justify-center">
             <Plus size={11.5} stroke-width={2.75} color="white" />
+        </div>
+    {/if}
+    {#if data.properties.removable}
+        <div class="indicator-added flex items-center justify-center">
+            <Minus size={11.5} stroke-width={2.75} color="white" />
         </div>
     {/if}
     {#if variant === "atom"}
@@ -164,6 +169,18 @@
                                     stroke-width={3}
                                 />
                                 <div>Added in Foil</div>
+                            </div>
+                        {/if}
+                        {#if data.properties.removable}
+                            <div
+                                class="col-span-2 rounded-sm bg-foreground/10 grid grid-cols-[auto_1fr] px-1 py-0.5 gap-1.5 items-center text-foreground mt-1"
+                            >
+                                <Minus
+                                    color="var(--color-foreground)"
+                                    size={12}
+                                    stroke-width={3}
+                                />
+                                <div>Removed in Foil</div>
                             </div>
                         {/if}
                     </div>

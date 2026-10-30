@@ -40,6 +40,7 @@ export type Node = {
   atom_type?: "action" | "fluent";
   first_order?: string;
   addable?: boolean;
+  removable?: boolean;
 };
 
 export type Edge = {
