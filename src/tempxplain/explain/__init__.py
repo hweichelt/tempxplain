@@ -27,6 +27,7 @@ log = get_logger("server.explain")
 # Enable python for the clingo encodings in asplain using it
 enable_python()
 
+DEFAULT_DYNAMIC_TAGS_ENCODING = Path(__file__).parent.parent / "encodings" / "tags" / "default.lp"
 DEFAULT_COST_ENCODING = Path(__file__).parent.parent / "encodings" / "cost" / "default.lp"
 NUMBER_OF_REFERENCE_MODELS = 0
 NUMBER_OF_EXPLANATIONS = 0
@@ -278,7 +279,7 @@ def navigate_reference_models(
         list(files),
         constants=constants,
         assumptions=list(assumptions),
-        dynamic_tags_files=[],
+        dynamic_tags_files=[str(DEFAULT_DYNAMIC_TAGS_ENCODING)],
     )
     model_subgraphs_ctl = set_model_subgraphs_ctl(pg=reference_pg, ctl=control, model_symbols=model_symbols)
     with model_subgraphs_ctl.solve(yield_=True) as solve_handle:
@@ -331,7 +332,7 @@ def navigate_foil_models(
         list(files),
         constants=constants,
         assumptions=list(assumptions),
-        dynamic_tags_files=[],
+        dynamic_tags_files=[str(DEFAULT_DYNAMIC_TAGS_ENCODING)],
     )
 
     found_any = False
