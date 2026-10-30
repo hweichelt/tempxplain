@@ -260,6 +260,7 @@ def transform_temporal(symbols: Iterable[Symbol]) -> list[Symbol]:
             Transformation.FACT_RULES,
             Transformation.STATIC_DOMAIN_FACTS,
             Transformation.LEAF_RULES,
+            Transformation.IRRELEVANT,
         ],
     )
 

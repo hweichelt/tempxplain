@@ -2,6 +2,7 @@
 
 % @time(T) :: occurs(A,T)
 % @time(T) :: holds(F,T)
+% @time(T) :: has_action(R,T)
 
 time(0..horizon).
 
@@ -22,7 +23,8 @@ edge((X,Y),(X+DX,Y+DY)) :- cell((X,Y)), cell((X+DX,Y+DY)), diff(A,(DX,DY)).
 % @label("At time {} there cannot be two actions {} and {} for the same robot {}.",(T,A1,A2,R,))
 % @time(T)
 :- time(T), time(T+1), occurs(action(R,A1),T), occurs(action(R,A2),T), A1!=A2.
-% explicitly encode that action happens for asplain
+% @label("At time {} robot {} executed action {}",(T,R,A,))
+% @time(T)
 has_action(R,T) :- occurs(action(R,A),T).
 
 % ACTION CONDITIONS
