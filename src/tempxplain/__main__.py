@@ -81,8 +81,8 @@ def main() -> None:
         log,
         query=args.query,
         files=args.files,
-        cost_file=args.cost,
         viz_file=args.viz,
+        cost_file=args.cost_file,
         model_file=args.model_file,
     )
 

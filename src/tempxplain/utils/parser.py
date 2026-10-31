@@ -64,8 +64,8 @@ def get_parser() -> ArgumentParser:
         help="the query that should be satisfied in the foil model. (Follows the tempql syntax)",
     )
     parser.add_argument("--viz", help="visualization encoding for a domain timestep")
-    parser.add_argument("--cost", help="preference cost encoding for finding a foil")
-    parser.add_argument("--model-file", help="foil containing the atoms of a model to fix")
+    parser.add_argument("--cost-file", help="preference cost encoding for finding a foil")
+    parser.add_argument("--model-file", help="file containing the atoms of a model to fix")
 
     parser.add_argument("--host", default=DEFAULT_HOST, help="address the server listens on [%(default)s]")
     parser.add_argument("--port", default=DEFAULT_PORT, type=int, help="port the server listens on [%(default)s]")
