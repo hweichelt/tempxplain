@@ -9,7 +9,7 @@ body_time(rule(H,normal(B)),T)      :- rule(H,normal(B)),  literal_tuple(B,ID), 
 head_time(rule(disjunction(H),B),T) :- rule(disjunction(H),B), atom_tuple(H,A), tag(atom(A),time(T)).
 head_time(rule(choice(H),B),T)      :- rule(choice(H),B),      atom_tuple(H,A), tag(atom(A),time(T)).
 
-% Select time steps to include in minimization. Prefere body times over head times
+% Select time steps to include in minimization. Prefer body times over head times
 rule_time(R,T) :- body_time(R,T).
 rule_time(R,T) :- head_time(R,T), not body_time(R,_).
 
