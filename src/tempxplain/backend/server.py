@@ -1,5 +1,6 @@
 """The WebSocket server connecting to the frontend."""
 
+import time
 from collections.abc import Generator
 from contextlib import suppress
 from pathlib import Path
@@ -69,7 +70,10 @@ class ServerState:
     def next_reference(self) -> None:
         """Find the next reference model."""
         try:
+            t_start: float = time.perf_counter()
             model = next(self._generator_reference)
+            t_end = time.perf_counter()
+            log.info(f"Generated reference model in {t_end - t_start:.2f}s")
             model_id = 1 if self._current_reference_id is None else self._current_reference_id + 1
             self._references[model_id] = model
             self._current_reference_id = model_id
@@ -92,7 +96,10 @@ class ServerState:
                 custom_cost=self.program_data.cost_file,
             )
         try:
+            t_start: float = time.perf_counter()
             exp = next(self._generator_foil)
+            t_end = time.perf_counter()
+            log.info(f"Generated explanation in {t_end - t_start:.2f}s")
             exp_id = (
                 (1, 1)
                 if self._current_explanation_id is None
