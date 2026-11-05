@@ -1,0 +1,17 @@
+occurs(action(0,right),0).  occurs(action(1,left),0).   occurs(action(2,right),0).  occurs(action(3,left),0).
+occurs(action(0,right),1).  occurs(action(1,left),1).   occurs(action(2,right),1).  occurs(action(3,left),1).
+occurs(action(0,down),2).   occurs(action(1,up),2).     occurs(action(2,up),2).     occurs(action(3,down),2).
+occurs(action(0,down),3).   occurs(action(1,up),3).     occurs(action(2,up),3).     occurs(action(3,down),3).
+occurs(action(0,down),4).
+occurs(action(0,right),5).                              occurs(action(2,up),5).
+occurs(action(0,right),6).                              occurs(action(2,right),6).
+occurs(action(0,right),7).                              occurs(action(2,right),7).
+occurs(action(0,right),8).  occurs(action(1,up),8).     occurs(action(2,right),8).
+occurs(action(0,down),9).   occurs(action(1,left),9).   occurs(action(2,right),9).  occurs(action(3,down),9).
+occurs(action(0,down),10).  occurs(action(1,left),10).  occurs(action(2,up),10).    occurs(action(3,left),10).
+occurs(action(0,down),11).  occurs(action(1,left),11).  occurs(action(2,left),11).  occurs(action(3,left),11).
+                            occurs(action(1,left),12).  occurs(action(2,right),12). occurs(action(3,left),12).
+occurs(action(0,up),13).    occurs(action(1,up),13).    occurs(action(2,up),13).    occurs(action(3,down),13).
+occurs(action(0,down),14).  occurs(action(1,up),14).                                occurs(action(3,down),14).
+                            occurs(action(1,up),15).                                occurs(action(3,down),15).
+                                                        occurs(action(2,up),16).    occurs(action(3,left),16).
