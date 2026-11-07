@@ -4,7 +4,11 @@ import ELK, {
 } from "elkjs/lib/elk.bundled.js";
 import { MarkerType, Position, type Edge, type Node } from "@xyflow/svelte";
 
-import type { Graph, Node as BackendNode } from "$lib/bindings";
+import type {
+  Edge as BackendEdge,
+  Graph,
+  Node as BackendNode,
+} from "$lib/bindings";
 
 export type SectionData = { label: string };
 export type LayoutResult = { nodes: Node[]; edges: Edge[] };
@@ -31,6 +35,15 @@ const node_type_labels = new Map([
   ["atom", "atom"],
 ]);
 const DEFAULT_NODE_TYPE = "default";
+
+const NEGATIVE_EDGE_STYLE = "stroke-dasharray: 6 4";
+const INERTIA_EDGE_STYLE = "stroke-width: 2.5";
+const EDGE_MARKER = {
+  type: MarkerType.ArrowClosed,
+  markerUnits: "userSpaceOnUse",
+  width: 12.5,
+  height: 12.5,
+};
 
 const elk = new ELK();
 
@@ -144,6 +157,17 @@ function is_inertia_edge(
   return false;
 }
 
+function edge_style(
+  node_data: Map<string, BackendNode>,
+  edge: BackendEdge,
+): string | undefined {
+  if (edge.type === "negative") return NEGATIVE_EDGE_STYLE;
+  if (is_inertia_edge(node_data, edge.source, edge.target)) {
+    return INERTIA_EDGE_STYLE;
+  }
+  return undefined;
+}
+
 export async function layout_graph(data: Graph): Promise<LayoutResult> {
   const node_data = new Map(data.nodes.map((node) => [node.id, node]));
   const result = await elk.layout(to_elk_graph(data));
@@ -174,8 +198,8 @@ export async function layout_graph(data: Graph): Promise<LayoutResult> {
     id: edge_id(edge.source, edge.target),
     source: edge.source,
     target: edge.target,
-    animated: is_inertia_edge(node_data, edge.source, edge.target),
-    markerEnd: { type: MarkerType.ArrowClosed },
+    style: edge_style(node_data, edge),
+    markerEnd: EDGE_MARKER,
   }));
 
   return { nodes, edges };
