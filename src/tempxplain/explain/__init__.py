@@ -11,6 +11,7 @@ import clingo
 from asplain import construct_program_graph, set_foil_ctl, set_model_subgraphs_ctl
 from asplain.transformations.transformers import Transformation, apply_transformation_sequence
 from asplain.utils.clingo import symbols_to_prg
+from asplain.utils.viz import viz_graph
 from clingo import SolveHandle, Symbol
 from clingo.script import enable_python
 
@@ -234,10 +235,10 @@ class Explanation:
         return TemporalExplanationGraph.from_symbols(self.transformed.symbols)
 
 
-def transform_temporal(symbols: Iterable[Symbol]) -> list[Symbol]:
+def transform_temporal(symbols: Iterable[Symbol], store: bool = True) -> list[Symbol]:
     """Transform the symbols of an explanation graph with the temporal pruning pipeline."""
     log.info("Applying temporal pruning")
-    return apply_transformation_sequence(
+    graph = apply_transformation_sequence(
         symbols,
         [
             Transformation.NO_MODEL,
@@ -248,6 +249,14 @@ def transform_temporal(symbols: Iterable[Symbol]) -> list[Symbol]:
             Transformation.INERTIA_CONDENSATION,
         ],
     )
+    if store:
+        viz_graph(
+            pg=to_program(graph),
+            title="Contrastive Transformed Graph",
+            name="contrastive_transformed",
+            show=False,
+        )
+    return graph
 
 
 def navigate_reference_models(
